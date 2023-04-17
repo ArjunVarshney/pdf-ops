@@ -1,6 +1,6 @@
 {
   "name": "pdf-ops",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "Do multile pdf operations with one package",
   "main": "build/index.js",
   "scripts": {

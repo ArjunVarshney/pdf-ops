@@ -18,14 +18,14 @@
     - [Merge multiple PDFs multiple times with a single object](#merge-multiple-pdfs-multiple-times-with-a-single-object)
     - [Get buffer of the resultant merged PDF](#get-buffer-of-the-resultant-pdf)
   - [Rotate Pdfs](#rotate-pdf)
-    - Rotate all pages of a PDF
-    - Rotate pages of different PDFs with range specification
-    - Merge multiple rotated pdf with single object
-    - Get buffer of the resultant rotated PDF
+    - [Rotate all pages of a PDF](#rotate-all-pages-of-a-pdf)
+    - [Rotate pages of different PDFs with range specification](#rotate-pages-of-different-pdfs-with-range-specification)
+    - [Merge multiple rotated pdf with single object](#merge-multiple-rotated-pdf-with-single-object)
+    - [Get buffer of the resultant rotated PDF](#get-buffer-of-the-resultant-rotated-pdf)
 
 ## Description
 
-This node js package is able to merge or split pdfs as desired and is able to save the resultant pdf as a new file or return a file Buffer.
+This node js package is able to perform various pdf tasks as desired and is able to save the resultant pdf as a new file or return a file Buffer.
 
 ## Installation
 
@@ -35,6 +35,7 @@ This node js package is able to merge or split pdfs as desired and is able to sa
 
 - Split PDFs
 - Merge PDFs
+- Rotate PDFs
 
 ## Usage Examples
 
