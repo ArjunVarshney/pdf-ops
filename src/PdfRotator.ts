@@ -1,9 +1,10 @@
+import { PDFDocument, degrees } from 'pdf-lib';
 import fs from 'fs';
-import { PDFDocument } from 'pdf-lib';
 import { extendPdf } from './pdf-micro-tools/extendPdf';
 import { splitPdf } from './pdf-micro-tools/splitPdf';
+import { rotatePdf } from './pdf-micro-tools/rotatePdf';
 
-export default class PdfMerger {
+export default class PdfRotator {
   private pdfDoc: PDFDocument | undefined;
 
   constructor() {
@@ -33,43 +34,37 @@ export default class PdfMerger {
     }
   }
 
-  // To merge all the pages of all the pdfs into a single pdf
-  async merge(files: string[] | PDFDocument[]) {
-    const pdfFileList: PDFDocument[] = [];
-    for (const file of files) {
-      if (typeof file === 'string') {
-        pdfFileList.push(await this.readDoc(file));
-      } else {
-        pdfFileList.push(file);
-      }
+  // To rotate the pdf(all pages)
+  async rotate(file: string | PDFDocument, degree: number) {
+    let pdf;
+    if (typeof file === 'string') {
+      pdf = await this.readDoc(file);
+    } else {
+      pdf = file;
     }
+
+    pdf = await rotatePdf(pdf, degree);
+
     await this.ensureDoc();
     if (this.pdfDoc) {
-      try {
-        this.pdfDoc = await extendPdf(this.pdfDoc, pdfFileList);
-      } catch (err) {
-        throw new Error(`Error merging PDFs: ${err}`);
-      }
+      this.pdfDoc = await extendPdf(this.pdfDoc, [pdf]);
     }
   }
 
-  // to merge the pdfs with range specified for the pages of the Pdf into one pdf
-  async mergeWithRange(orderList: { filepath: string; range: [number, number][] }[]) {
-    const toBeMerged: PDFDocument[] = [];
+  // To rotate the pdf with the specified range and angle
+  async rotateWithRange(orderList: { file: string | PDFDocument; range: [number, number][]; degree: number }[]) {
     for (const part of orderList) {
-      try {
-        const pdf = await this.readDoc(part.filepath);
-        const trimmed = await splitPdf(pdf, part.range);
-        toBeMerged.push(...trimmed);
-      } catch (err) {
-        throw new Error(`Error splitting pdf ${part.filepath}: ${err}`);
+      let pdf;
+      if (typeof part.file === 'string') {
+        pdf = await this.readDoc(part.file);
+      } else {
+        pdf = part.file;
       }
-    }
-    if (this.pdfDoc) {
-      try {
-        this.pdfDoc = await extendPdf(this.pdfDoc, toBeMerged);
-      } catch (err) {
-        throw new Error(`Error mergin splitted PDFs: ${err}`);
+
+      const splitted = await splitPdf(pdf, part.range);
+
+      for (const doc of splitted) {
+        await this.rotate(doc, part.degree);
       }
     }
   }

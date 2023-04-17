@@ -17,4 +17,13 @@ declare module 'pdf-ops' {
     save(dirpath: string, dirname: string): Promise<void>;
     getPdfBuffer(): Promise<Uint8Array[] | undefined>;
   }
+
+  export class PdfRotator {
+    constructor();
+    clearDoc(): Promise<void>;
+    rotate(file: string, degree: number): Promise<void>;
+    rotateWithRange(orderList: { file: string; range: [number, number][]; degree: number }[]): Promise<void>;
+    save(filepath: string): Promise<void>;
+    getPdfBuffer(): Promise<Uint8Array[] | undefined>;
+  }
 }

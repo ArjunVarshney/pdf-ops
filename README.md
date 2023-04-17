@@ -7,16 +7,21 @@
 - [Features](#features)
 - [Usage Example](#usage-examples)
   - [Split Pdfs](#split-pdfs)
-    - Split PDF into single paged PDFs
-    - Split PDF with range specification
-    - Split multiple PDFs with a single object
-    - Merge Splitted PDfs into a sigle PDF
-    - Get array of buffer of the resultant PDFs
+    - [Split PDF into single paged PDFs](#split-pdf-into-single-paged-pdfs)
+    - [Split PDF with range specification](#split-pdf-with-range-specification)
+    - [Split multiple PDFs with a single object](#split-multiple-pdfs-with-a-single-object)
+    - [Merge Splitted PDfs into a sigle PDF](#merge-splitted-pdfs-into-a-sigle-pdf)
+    - [Get array of buffer of the resultant PDFs](#get-array-of-buffer-of-the-resultant-pdfs)
   - [Merge Pdfs](#merge-pdfs)
-    - Merge multiple PDFs (all pages of all PDFs) into a single PDF
-    - Merge multiple PDFs with range specification
-    - Merge multiple PDFs multiple times with a single object
-    - Get buffer of the resultant PDF
+    - [Merge multiple PDFs (all pages of all PDFs) into a single PDF](#merge-multiple-pdfs-all-pages-of-all-pdfs-into-a-single-pdf)
+    - [Merge multiple PDFs with range specification](#merge-multiple-pdfs-with-range-specification)
+    - [Merge multiple PDFs multiple times with a single object](#merge-multiple-pdfs-multiple-times-with-a-single-object)
+    - [Get buffer of the resultant merged PDF](#get-buffer-of-the-resultant-pdf)
+  - [Rotate Pdfs](#rotate-pdf)
+    - Rotate all pages of a PDF
+    - Rotate pages of different PDFs with range specification
+    - Merge multiple rotated pdf with single object
+    - Get buffer of the resultant rotated PDF
 
 ## Description
 
@@ -179,6 +184,8 @@ import { PdfSplitter } from 'pdf-ops';
 
 (async () => {
   const splitter = new PdfSplitter();
+
+  // Split the desired pdfs
   await splitter.splitWithRange('test_files/pdf1.pdf', [[0, 3]]);
   await splitter.split('test_files/pdf2.pdf');
   await splitter.splitWithRange('test_files/pdf1.pdf', [[3, 6]]);
@@ -350,6 +357,7 @@ import { PdfMerger } from 'pdf-ops';
 (async () => {
   const merger = new PdfMerger();
 
+  // Merge the desired pdfs
   await merger.mergeWithRange([
     { filepath: 'test_files/pdf1.pdf', range: [[0, 2]] },
     { filepath: 'test_files/pdf2.pdf', range: [[4, 6]] },
@@ -358,6 +366,168 @@ import { PdfMerger } from 'pdf-ops';
 
   // Get the buffer of the merged pdfs
   const buffer = await merger.getPdfBuffer();
+
+  console.log(buffer);
+})();
+```
+
+### Rotate Pdfs
+
+#### **Rotate all pages of a PDF**
+
+```js
+import { PdfRotator } from 'pdf-ops';
+
+(async () => {
+  // Make an object of the class PdfRotator
+  const rotator = new PdfRotator();
+
+  // rotate the desired pdf
+  // the angle should be a multiple of 90
+  await rotator.rotate('test_files/pdf1.pdf', 90);
+
+  // Save the rotated Pdf
+  await rotator.save('test_files/rotated.pdf');
+})();
+```
+
+In this example [pdf1](/example-files/pdf1.pdf) will generate [rotated.pdf](/example-files/rotated.pdf)
+
+#### **Rotate pages of different PDFs with range specification**
+
+```js
+import { PdfRotator } from 'pdf-ops';
+
+(async () => {
+  // Make an object of the class PdfRotator
+  const rotator = new PdfRotator();
+
+  // Give an array of objects which contains
+  // file, range, degree
+  // as given in the example
+  await rotator.rotateWithRange([
+    {
+      // give the filepath inside the file field
+      file: 'test_files/pdf1.pdf',
+      // range is a list of range of pages
+      // the range is specified as [start, end]
+      // start page is included and end page is excluded
+      range: [
+        [0, 2],
+        [4, 6],
+      ],
+      // degree should be a multiple of 90
+      degree: 90,
+    },
+    {
+      file: 'test_files/pdf2.pdf',
+      range: [
+        [0, 1],
+        [4, 5],
+      ],
+      degree: -90,
+    },
+    {
+      file: 'test_files/pdf3.pdf',
+      range: [
+        [4, 6],
+        [0, 2],
+      ],
+      degree: 180,
+    },
+  ]);
+
+  // Save the rotated Pdf
+  await rotator.save('test_files/rotatedWithRange.pdf');
+})();
+```
+
+In this example [pdf1](/example-files/pdf1.pdf), [pdf2](/example-files/pdf2.pdf), and [pdf3](/example-files/pdf3.pdf) will generate [rotatedWithRange.pdf](/example-files/rotatedWithRange.pdf)
+
+#### **Merge multiple rotated pdf with single object**
+
+- The rotated pdfs rotated with a single object will be automatically merged in order in which they were rotated
+
+- The object will not be cleared after saving the file, therefore the pdfs will keep on getting merged into the previously rotated pdf files
+
+- For clearing the pages in the object use `await rotator.clearDoc()`
+
+- Lets put all this into an example for explanation
+
+```js
+import { PdfRotator } from 'pdf-ops';
+
+(async () => {
+  // Make an object of the class PdfRotator
+  const rotator = new PdfRotator();
+
+  // rotating pdf1 90 degrees
+  await rotator.rotate('test_files/pdf1.pdf', 90);
+
+  // rotating some pages of pdf3 180 degrees and merging into previous pdf
+  await rotator.rotateWithRange([
+    {
+      file: 'test_files/pdf3.pdf',
+      range: [[1, 5]],
+      degree: 180,
+    },
+  ]);
+
+  // saving the resultant pdf file as rotated1.pdf
+  await rotator.save('test_files/rotated1.pdf');
+
+  // rotating some pages and merging pdf2 and rotating it -90 degrees
+  await rotator.rotateWithRange([
+    {
+      file: 'test_files/pdf2.pdf',
+      range: [
+        [0, 1],
+        [5, 6],
+      ],
+      degree: -90,
+    },
+  ]);
+
+  // saving the resultant file as rotated2.pdf
+  await rotator.save('test_files/rotated2.pdf');
+
+  // clearing all the pages of the object
+  await rotator.clearDoc();
+
+  // rotating pdf4 by 0 degrees
+  await rotator.rotate('test_files/pdf4.pdf', 0);
+
+  // saving the resultant file as rotated3.pdf
+  await rotator.save('test_files/rotated3.pdf');
+})();
+```
+
+- If [pdf1](/example-files/pdf1.pdf), [pdf2](/example-files/pdf2.pdf), and [pdf3](/example-files/pdf3.pdf), and [pdf4](/example-files/pdf4.pdf) look like this.
+- Then [rotated1.pdf](/example-files/rotated1.pdf), [rotated2.pdf](/example-files/rotated2.pdf), and [rotated3.pdf](/example-files/rotated3.pdf) will look like this
+
+#### **Get buffer of the resultant rotated PDF**
+
+- Getting the buffer (Uint8Array) is pretty straight foward. You can access buffer by `await rotator.getPdfBuffer()` and it will return you the buffer of the resultant pdf
+
+```js
+import { PdfRotator } from 'pdf-ops';
+
+(async () => {
+  const rotator = new PdfRotator();
+
+  // Rotate the pdfs as desired
+  await rotator.rotate('test_files/pdf1.pdf', 90);
+  await rotator.rotateWithRange([
+    {
+      file: 'test_files/pdf3.pdf',
+      range: [[1, 5]],
+      degree: 180,
+    },
+  ]);
+  await rotator.rotate('test_files/pdf4.pdf', 0);
+
+  // To the the buffer of the resultant pdf
+  const buffer = await rotator.getPdfBuffer();
 
   console.log(buffer);
 })();
