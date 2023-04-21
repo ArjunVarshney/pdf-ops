@@ -1,10 +1,11 @@
-import { PDFDocument, degrees } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import fs from 'fs';
 import { extendPdf } from './pdf-micro-tools/extendPdf';
 import { splitPdf } from './pdf-micro-tools/splitPdf';
-import { rotatePdf } from './pdf-micro-tools/rotatePdf';
+import { resizePdf } from './pdf-micro-tools/resizePdf';
+import { resizeOptions } from './types';
 
-export default class PdfRotator {
+export default class PdfResizer {
   private pdfDoc: PDFDocument | undefined;
 
   constructor() {
@@ -16,16 +17,16 @@ export default class PdfRotator {
     this.pdfDoc = await PDFDocument.create();
   }
 
-  // getter for pdfDoc
-  getDoc() {
-    return this.pdfDoc;
-  }
-
   // This ensure that pdfDoc is not undefined
   private async ensureDoc() {
     if (!this.pdfDoc) {
       await this.clearDoc();
     }
+  }
+
+  // Getter for the pdfDocs array
+  getDocs() {
+    return this.pdfDoc;
   }
 
   // To read the pdf file from the file system and convert it to a PDFDocument object
@@ -39,38 +40,52 @@ export default class PdfRotator {
     }
   }
 
-  // To rotate the pdf(all pages)
-  async rotate(file: string | PDFDocument, degree: number) {
-    let pdf;
-    if (typeof file === 'string') {
-      pdf = await this.readDoc(file);
-    } else {
-      pdf = file;
-    }
+  // to resize all the pages of the Given pdf
+  async resize(file: string | PDFDocument, options?: resizeOptions) {
+    try {
+      let pdf;
+      if (typeof file === 'string') {
+        pdf = await this.readDoc(file);
+      } else {
+        pdf = file;
+      }
 
-    pdf = await rotatePdf(pdf, degree);
+      await this.ensureDoc();
+      if (!this.pdfDoc) return;
 
-    await this.ensureDoc();
-    if (this.pdfDoc) {
+      pdf = await resizePdf(pdf, options);
+
       this.pdfDoc = await extendPdf(this.pdfDoc, [pdf]);
+    } catch (err) {
+      throw new Error(`Error resizing the pdf: ${err}`);
     }
   }
 
-  // To rotate the pdf with the specified range and angle
-  async rotateWithRange(orderList: { file: string | PDFDocument; range: [number, number][]; degree: number }[]) {
-    for (const part of orderList) {
-      let pdf;
-      if (typeof part.file === 'string') {
-        pdf = await this.readDoc(part.file);
-      } else {
-        pdf = part.file;
-      }
+  // Resize the pdf using a range specified by the user
+  async resizeWithRange(
+    orderList: {
+      file: string | PDFDocument;
+      range: [number, number][];
+      options?: resizeOptions;
+    }[],
+  ) {
+    try {
+      for (const part of orderList) {
+        let pdf;
+        if (typeof part.file === 'string') {
+          pdf = await this.readDoc(part.file);
+        } else {
+          pdf = part.file;
+        }
 
-      const splitted = await splitPdf(pdf, part.range);
+        const splitted = await splitPdf(pdf, part.range);
 
-      for (const doc of splitted) {
-        await this.rotate(doc, part.degree);
+        for (const doc of splitted) {
+          await this.resize(doc, part.options);
+        }
       }
+    } catch (err) {
+      throw new Error(`Error resizing the pdf: ${err}`);
     }
   }
 

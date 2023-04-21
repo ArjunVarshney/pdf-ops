@@ -22,6 +22,12 @@
     - [Rotate pages of different PDFs with range specification](#rotate-pages-of-different-pdfs-with-range-specification)
     - [Merge multiple rotated pdf with single object](#merge-multiple-rotated-pdf-with-single-object)
     - [Get buffer of the resultant rotated PDF](#get-buffer-of-the-resultant-rotated-pdf)
+  - [Resize Pdfs](#resize-pdfs)
+    - [Resize all pages of a PDF](#resize-all-pages-of-a-pdf)
+    - [Possible values in resize options](#possible-values-in-resize-options)
+    - [Resize pages of different PDFs with range specification](#resize-pages-of-different-pdfs-with-range-specification)
+    - [Merge multiple resized pdf with single object](#merge-multiple-resized-pdf-with-single-object)
+    - [Get buffer of the resultant resized PDF](#get-buffer-of-the-resultant-resized-pdf)
 
 ## Description
 
@@ -36,6 +42,7 @@ This node js package is able to perform various pdf tasks as desired and is able
 - Split PDFs
 - Merge PDFs
 - Rotate PDFs
+- Resize PDFs
 
 ## Usage Examples
 
@@ -529,6 +536,244 @@ import { PdfRotator } from 'pdf-ops';
 
   // To the the buffer of the resultant pdf
   const buffer = await rotator.getPdfBuffer();
+
+  console.log(buffer);
+})();
+```
+
+### Resize Pdfs
+
+#### **Resize all pages of a PDF**
+
+```js
+import { PdfResizer } from 'pdf-ops';
+
+(async () => {
+  // Make an object of the PdfResizer class
+  const resizer = new PdfResizer();
+
+  // resize pdf as desired
+  // The second parameter are the options(optional) refer to details below this block
+  options = {
+    // You can also give custom sizes
+    //eg- size: [900, 900],
+    size: 'A3',
+  };
+  await resizer.resize('test_files/pdf3.pdf', options);
+
+  // save the resized pdf
+  await resizer.save('./test_files/resized.pdf');
+})();
+```
+
+In this example [pdf3](/example-files/pdf3.pdf) will generate [resized.pdf](/example-files/resized.pdf)
+
+#### **Possible values in resize options**
+
+```ts
+// default values if not specified in the options variable
+default_option_values = {
+  orientation: 'portrait',
+  mode: 'shrink-to-fit',
+  position: 'center',
+  size: 'A4',
+};
+
+// allowed options
+type resizeOptions = {
+  orientation: 'portrait' | 'landscape';
+  mode: 'shrink-to-fit' | 'fit-to-page' | 'crop';
+  position:
+    | 'center'
+    | 'top-left'
+    | 'top-right'
+    | 'bottom-right'
+    | 'bottom-left'
+    | 'center-left'
+    | 'center-right'
+    | 'center-top'
+    | 'center-bottom';
+  size:
+    | [number, number] // this is for custom size
+    | '4A0'
+    | '2A0'
+    | 'A0'
+    | 'A1'
+    | 'A2'
+    | 'A3'
+    | 'A4'
+    | 'A5'
+    | 'A6'
+    | 'A7'
+    | 'A8'
+    | 'A9'
+    | 'A10'
+    | 'B0'
+    | 'B1'
+    | 'B2'
+    | 'B3'
+    | 'B4'
+    | 'B5'
+    | 'B6'
+    | 'B7'
+    | 'B8'
+    | 'B9'
+    | 'B10'
+    | 'C0'
+    | 'C1'
+    | 'C2'
+    | 'C3'
+    | 'C4'
+    | 'C5'
+    | 'C6'
+    | 'C7'
+    | 'C8'
+    | 'C9'
+    | 'C10'
+    | 'RA0'
+    | 'RA1'
+    | 'RA2'
+    | 'RA3'
+    | 'RA4'
+    | 'SRA0'
+    | 'SRA1'
+    | 'SRA2'
+    | 'SRA3'
+    | 'SRA4'
+    | 'Executive'
+    | 'Folio'
+    | 'Legal'
+    | 'Letter'
+    | 'Tabloid';
+};
+```
+
+#### **Resize pages of different PDFs with range specification**
+
+```js
+import { PdfResizer } from 'pdf-ops';
+
+(async () => {
+  // Make an object of the PdfResizer class
+  const resizer = new PdfResizer();
+
+  // resize pdf as desired
+  // multiple resized pdf will be merged into one during save
+  await resizer.resizeWithRange([
+    {
+      file: 'test_files/pdf1.pdf',
+      range: [[2, 5]],
+      // refer to the resize options for possible allowed values
+      options: {
+        size: 'Letter',
+        orientation: 'landscape',
+      },
+    },
+    {
+      file: 'test_files/pdf4.pdf',
+      range: [[1, 3]],
+      options: {
+        size: 'A5',
+        mode: 'crop',
+      },
+    },
+  ]);
+
+  // save the resized pdf
+  await resizer.save('./test_files/resizedWithRange.pdf');
+})();
+```
+
+In this example [pdf1](/example-files/pdf1.pdf) and [pdf4](/example-files/pdf4.pdf) will generate [resizedWithRange.pdf](/example-files/resizedWithRange.pdf)
+
+#### **Merge multiple resized pdf with single object**
+
+- The resized pdfs resized with a single object will be automatically merged in order in which they were resized
+
+- The object will not be cleared after saving the file, therefore the pdfs will keep on getting merged into the previously resized pdf files
+
+- For clearing the pages in the object use `await resizer.clearDoc()`
+
+- Lets put all this into an example for explanation
+
+```js
+import { PdfResizer } from 'pdf-ops';
+
+(async () => {
+  // Make an object of the PdfResizer class
+  const resizer = new PdfResizer();
+
+  // resize pdf3
+  await resizer.resize('test_files/pdf3.pdf', {
+    size: 'A3',
+    mode: 'crop',
+    position: 'top-left',
+  });
+
+  // resize some pages of pdf4
+  await resizer.resizeWithRange([
+    {
+      file: 'test_files/pdf4.pdf',
+      range: [
+        [0, 2],
+        [4, 5],
+      ],
+      options: { size: 'A5' },
+    },
+  ]);
+
+  // save resultant pdf as resized1.pdf
+  await resizer.save('test_files/resized1.pdf');
+
+  // resize pdf1
+  await resizer.resize('test_files/pdf1.pdf', {
+    size: 'A4',
+    orientation: 'landscape',
+    position: 'center-right',
+  });
+
+  // save resultant pdf as resized2.pdf
+  await resizer.save('test_files/resized2.pdf');
+
+  // clear all the pages from the object
+  await resizer.clearDoc();
+
+  // resize some pages of pdf2
+  await resizer.resizeWithRange([
+    {
+      file: 'test_files/pdf2.pdf',
+      range: [[1, 3]],
+    },
+  ]);
+
+  // save resultant pdf as resized3.pdf
+  await resizer.save('test_files/resized3.pdf');
+})();
+```
+
+- If [pdf1](/example-files/pdf1.pdf), [pdf2](/example-files/pdf2.pdf), [pdf3](/example-files/pdf3.pdf), and [pdf4](/example-files/pdf4.pdf) look like this
+- Then [resized1](/example-files/resized1.pdf), [resized2](/example-files/resized2.pdf), and [resized3](/example-files/resized3.pdf) will look like this
+
+#### **Get buffer of the resultant resized PDF**
+
+- Getting the buffer (Uint8Array) is pretty straight foward. You can access buffer by `await resizer.getPdfBuffer()` and it will return you the buffer of the resultant pdf
+
+```js
+import { PdfResizer } from 'pdf-ops';
+
+(async () => {
+  const resizer = new PdfResizer();
+  await resizer.resize('test_files/pdf3.pdf', { size: 'A3', mode: 'crop' });
+  await resizer.resizeWithRange([
+    {
+      file: 'test_files/pdf4.pdf',
+      range: [[0, 2]],
+      options: { size: 'A5' },
+    },
+  ]);
+
+  // To get the pdfBuffer
+  const buffer = await resizer.getPdfBuffer();
 
   console.log(buffer);
 })();

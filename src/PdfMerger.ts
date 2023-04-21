@@ -15,6 +15,11 @@ export default class PdfMerger {
     this.pdfDoc = await PDFDocument.create();
   }
 
+  // getter for pdfDoc
+  getDoc() {
+    return this.pdfDoc;
+  }
+
   // This ensure that pdfDoc is not undefined
   private async ensureDoc() {
     if (!this.pdfDoc) {
