@@ -26,8 +26,8 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
   for (const page of pages) {
     const { width, height } = page.getSize();
 
-    let newWidth = 0,
-      newHeight = 0;
+    let newWidth = 0;
+    let newHeight = 0;
 
     if (typeof options.size === 'string') {
       [newWidth, newHeight] = paperSizes[options.size];
@@ -37,7 +37,7 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
 
     // set the orientation
     if (options.orientation === 'landscape') {
-      let temp = newWidth;
+      const temp = newWidth;
       newWidth = newHeight;
       newHeight = temp;
     }
@@ -46,27 +46,27 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
     page.setSize(newWidth, newHeight);
 
     // scale the content of the page as specified
-    let height_scale = 1;
-    let width_scale = 1;
+    let heightScale = 1;
+    let widthScale = 1;
 
     if (options.mode === 'shrink-to-fit') {
       const s = Math.min(newHeight / height, newWidth / width);
-      height_scale = s;
-      width_scale = s;
+      heightScale = s;
+      widthScale = s;
 
       page.scaleContent(s, s);
     } else if (options.mode === 'fit-to-page') {
-      height_scale = newHeight / height;
-      width_scale = newWidth / width;
+      heightScale = newHeight / height;
+      widthScale = newWidth / width;
 
-      page.scaleContent(width_scale, height_scale);
+      page.scaleContent(widthScale, heightScale);
     }
 
     //   translate the content whereever specifieds
     let translate: [number, number];
 
-    let offsetX = Math.round(newHeight - height * height_scale);
-    let offsetY = Math.round(newWidth - width * width_scale);
+    const offsetX = Math.round(newHeight - height * heightScale);
+    const offsetY = Math.round(newWidth - width * widthScale);
 
     // if the mode is fit-to-page no need to translate the page
     if (options.mode === 'fit-to-page') {
@@ -74,13 +74,13 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
     }
     // if the mode is shrink-to-fit only certain options need to be activated
     if (options.mode === 'shrink-to-fit') {
-      if (width * width_scale < newWidth) {
+      if (width * widthScale < newWidth) {
         if (options.position?.includes('left')) {
           options.position = 'center-left';
         } else if (options.position?.includes('right')) {
           options.position = 'center-right';
         }
-      } else if (height * height_scale < newHeight) {
+      } else if (height * heightScale < newHeight) {
         if (options.position?.includes('top')) {
           options.position = 'center-top';
         } else if (options.position?.includes('bottom')) {
