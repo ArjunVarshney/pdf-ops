@@ -29,7 +29,10 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
     let newWidth = 0;
     let newHeight = 0;
 
-    if (typeof options.size === 'string') {
+    if (options.size === 'do-not-change') {
+      newWidth = width;
+      newHeight = height;
+    } else if (typeof options.size === 'string') {
       [newWidth, newHeight] = paperSizes[options.size];
     } else if (typeof options.size === 'object') {
       [newWidth, newHeight] = options.size;

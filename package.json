@@ -1,6 +1,6 @@
 {
   "name": "pdf-ops",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Do multile pdf operations with one package",
   "main": "build/index.js",
   "scripts": {
@@ -30,7 +30,9 @@
     "build/**/*.d.ts"
   ],
   "dependencies": {
-    "pdf-lib": "^1.17.1"
+    "canvas": "^2.11.2",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^3.5.141"
   },
   "devDependencies": {
     "@types/node": "^18.15.11",

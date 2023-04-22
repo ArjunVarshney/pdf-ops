@@ -105,4 +105,18 @@ declare module 'pdf-ops' {
     save(filepath: string): Promise<void>;
     getPdfBuffer(): Promise<Uint8Array[] | undefined>;
   }
+
+  export class PdfToImageConverter {
+    constructor();
+    clearDoc(): Promise<void>;
+    getDoc(): Uint8Array[];
+    renderToImage(file: string, options?: resizeOptions): Promise<void>;
+    renderToImageWithRange(orderList: {
+      file: string;
+      range: [number, number][];
+      options?: resizeOptions;
+    }): Promise<void>;
+    save(dirpath: string, dirname: string): Promise<void>;
+    getImageBuffer(): Promise<Uint8Array[] | undefined>;
+  }
 }

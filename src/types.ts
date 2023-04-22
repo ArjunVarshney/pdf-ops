@@ -1,6 +1,7 @@
 export type resizeOptions = {
   size?:
     | [number, number]
+    | 'do-not-change'
     | '4A0'
     | '2A0'
     | 'A0'

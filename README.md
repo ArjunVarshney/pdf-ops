@@ -28,6 +28,12 @@
     - [Resize pages of different PDFs with range specification](#resize-pages-of-different-pdfs-with-range-specification)
     - [Merge multiple resized pdf with single object](#merge-multiple-resized-pdf-with-single-object)
     - [Get buffer of the resultant resized PDF](#get-buffer-of-the-resultant-resized-pdf)
+  - [Convert Pdf to Image](#convert-pdf-to-image)
+    - [Convert all pages of a PDF to images](#convert-all-pages-of-a-pdf-to-images)
+    - [Possible values in render Options](#possible-values-in-render-options)
+    - [Convert pages of different PDFs with range specification](#convert-pages-of-different-pdfs-with-range-specification)
+    - [Render images of many different PDFs with single object](#render-images-of-many-different-pdfs-with-single-object)
+    - [Get buffer of the resultant Images](#get-buffer-of-the-resultant-images)
 
 ## Description
 
@@ -43,6 +49,7 @@ This node js package is able to perform various pdf tasks as desired and is able
 - Merge PDFs
 - Rotate PDFs
 - Resize PDFs
+- Render PDFs to Images
 
 ## Usage Examples
 
@@ -554,11 +561,13 @@ import { PdfResizer } from 'pdf-ops';
 
   // resize pdf as desired
   // The second parameter are the options(optional) refer to details below this block
-  options = {
+  const options = {
     // You can also give custom sizes
     //eg- size: [900, 900],
     size: 'A3',
   };
+
+  // The specification of options is not necessary, if not given, default values will take over
   await resizer.resize('test_files/pdf3.pdf', options);
 
   // save the resized pdf
@@ -595,6 +604,7 @@ type resizeOptions = {
     | 'center-bottom';
   size:
     | [number, number] // this is for custom size
+    | 'do-not-change'
     | '4A0'
     | '2A0'
     | 'A0'
@@ -776,5 +786,168 @@ import { PdfResizer } from 'pdf-ops';
   const buffer = await resizer.getPdfBuffer();
 
   console.log(buffer);
+})();
+```
+
+### Convert Pdf to Image
+
+#### **Convert all pages of a PDF to images**
+
+```js
+import { PdfToImageConverter } from 'pdf-ops';
+
+(async () => {
+  // Make an object of the PdfToImageConverter class
+  const converter = new PdfToImageConverter();
+
+  // resize pdf as desired
+  // Specify the desired options(optional) refer to details below this block
+  const options = {
+    // You can also give custom sizes
+    //eg- size: [900, 900],
+    size: 'A3',
+    orientation: 'landscape',
+    mode: 'crop',
+    position: 'center-right',
+  };
+
+  // The specification of options is not necessary, if not given, default values will take over
+  await converter.renderToImage('test_files/pdf4.pdf', options);
+
+  // Save the folder carrying all the images
+  // The first parameter is the path of the directory in which it will get stored
+  // The second parameter is the name of the folder
+  await converter.save('./test_files', 'images');
+})();
+```
+
+In this example [pdf4](/example-files/pdf4.pdf) will generate [images folder](/example-files/images/)
+
+#### **Possible values in render Options**
+
+```js
+// default values in the render options
+default_render_options = {
+  size: 'do-not-change',
+  orientation: 'portrait',
+  mode: 'shrink-to-fit',
+  position: 'center',
+};
+
+// possible values in the options
+// all the resize options can be applied as renderOptions
+type renderOptions = {
+  ...resizeOptions,
+};
+```
+
+Refer to [resizeOptions](#possible-values-in-resize-options) for all the list of all the options
+
+#### **Convert pages of different PDFs with range specification**
+
+```js
+import { PdfToImageConverter } from 'pdf-ops';
+
+(async () => {
+  // Make an object of the PdfToImageConverter class
+  const converter = new PdfToImageConverter();
+
+  // convert the pdf to image as desired
+  await converter.renderToImageWithRange([
+    {
+      file: 'test_files/pdf2.pdf',
+      range: [
+        [0, 2],
+        [5, 6],
+      ],
+      options: { size: 'A4' },
+    },
+    {
+      file: 'test_files/pdf3.pdf',
+      range: [[2, 4]],
+    },
+  ]);
+
+  // save the forlder of images
+  await converter.save('./test_files', 'imagesWithRange');
+})();
+```
+
+In this example [pdf2](/example-files/pdf2.pdf) and [pdf3](/example-files/pdf3.pdf) will generate [imagesWithRange folder](/example-files/imagesWithRange/)
+
+#### **Render images of many different PDFs with single object**
+
+- You can keep on adding more and more image files in the same object, when you will save the images, all of them will be in the same folder, in the order in which they were splitted
+
+- Saving the file does not clear out the existing images, as you populate more and more images in the same object they will keep on getting accumulated.
+
+- For clearing all the images stored in the object you can use `converter.clearDoc()` to reinitialize a new empty PdfToImageConverter object
+
+- Let us put all the above into a expample for explanation
+
+```js
+import { PdfToImageConverter } from 'pdf-ops';
+
+(async () => {
+  const converter = new PdfToImageConverter();
+
+  // render pdf1
+  await converter.renderToImage('test_files/pdf1.pdf');
+
+  // some pages of pdf2
+  await converter.renderToImageWithRange([
+    {
+      file: 'test_files/pdf2.pdf',
+      range: [
+        [1, 2],
+        [4, 6],
+      ],
+    },
+  ]);
+
+  // save inside images1 folder
+  await converter.save('./test_files', 'images1');
+
+  // render pdf3
+  await converter.renderToImage('test_files/pdf3.pdf');
+
+  // save inside images2 folder
+  await converter.save('./test_files', 'images2');
+
+  // clear the documents
+  await converter.clearDoc();
+
+  // render some pages of pdf4
+  await converter.renderToImageWithRange([{ file: 'test_files/pdf4.pdf', range: [[1, 5]] }]);
+
+  // save inside images3 folder
+  await converter.save('./test_files', 'images3');
+})();
+```
+
+#### **Get buffer of the resultant Images**
+
+- Getting the buffer (Uint8Array) is pretty straight foward. You can access buffer by `converter.getImageBuffer()` and it will return you the array of buffers of all the images in the resultant object
+
+```js
+import { PdfToImageConverter } from 'pdf-ops';
+
+(async () => {
+  const converter = new PdfToImageConverter();
+  await converter.renderToImage('test_files/pdf1.pdf');
+  await converter.renderToImageWithRange([
+    {
+      file: 'test_files/pdf2.pdf',
+      range: [
+        [1, 2],
+        [4, 6],
+      ],
+    },
+  ]);
+
+  // To get the list of all the image buffers
+  const bufferList = converter.getImageBuffer();
+
+  console.log(bufferList);
 })();
 ```
