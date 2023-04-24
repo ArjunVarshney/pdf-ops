@@ -3,5 +3,6 @@ import PdfSplitter from './PdfSplitter';
 import PdfRotator from './PdfRotator';
 import PdfResizer from './PdfResizer';
 import PdfToImageConverter from './PdfToImageConverter';
+import PdfMarginManipulator from './PdfMarginManipulator';
 
-export { PdfMerger, PdfSplitter, PdfRotator, PdfResizer, PdfToImageConverter };
+export { PdfMerger, PdfSplitter, PdfRotator, PdfResizer, PdfToImageConverter, PdfMarginManipulator };

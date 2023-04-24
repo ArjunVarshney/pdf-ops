@@ -35,7 +35,11 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
     } else if (typeof options.size === 'string') {
       [newWidth, newHeight] = paperSizes[options.size];
     } else if (typeof options.size === 'object') {
+      const stdPaper = 'A4';
+      const multiplier = PageSizes[stdPaper][0] / 210;
       [newWidth, newHeight] = options.size;
+      newWidth *= multiplier;
+      newHeight *= multiplier;
     }
 
     // set the orientation

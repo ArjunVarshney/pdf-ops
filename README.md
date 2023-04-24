@@ -28,6 +28,11 @@
     - [Resize pages of different PDFs with range specification](#resize-pages-of-different-pdfs-with-range-specification)
     - [Merge multiple resized pdf with single object](#merge-multiple-resized-pdf-with-single-object)
     - [Get buffer of the resultant resized PDF](#get-buffer-of-the-resultant-resized-pdf)
+  - [Add Margin to the Pdf](#add-margin-to-the-pdf)
+    - [Add margin to all the pages of the pdf](#add-margin-to-all-the-pages-of-the-pdf)
+    - [Add margin to pages of different PDFs with a range specification](#add-margin-to-pages-of-different-pdfs-with-a-range-specification)
+    - [Merge multiple pdfs with added margin with single object](#merge-multiple-pdfs-with-added-margin-with-single-object)
+    - [Get buffer of the resultant pdf with added margin](#get-buffer-of-the-resultant-pdf-with-added-margin)
   - [Convert Pdf to Image](#convert-pdf-to-image)
     - [Convert all pages of a PDF to images](#convert-all-pages-of-a-pdf-to-images)
     - [Possible values in render Options](#possible-values-in-render-options)
@@ -49,6 +54,7 @@ This node js package is able to perform various pdf tasks as desired and is able
 - Merge PDFs
 - Rotate PDFs
 - Resize PDFs
+- Add Margin to the PDFs
 - Render PDFs to Images
 
 ## Usage Examples
@@ -789,7 +795,153 @@ import { PdfResizer } from 'pdf-ops';
 })();
 ```
 
+### Add Margin to the Pdf
+
+#### **Add margin to all the pages of the pdf**
+
+```js
+import { PdfMarginManipulator } from 'pdf-ops';
+
+(async () => {
+  // create a new object of the PdfMarginManipulator class
+  const marginManipulator = new PdfMarginManipulator();
+
+  // add margin to the pdf in [top, right, bottom, left] fashion
+  await marginManipulator.addMargin('test_files/pdf3.pdf', [20, 10, 5, 15]);
+
+  // save the resultant pdf
+  await marginManipulator.save('test_files/addedMargin.pdf');
+})();
+```
+
+In this example [pdf3](/example-files/pdf3.pdf) will generate [addedMargin.pdf](/example-files/addedMargin.pdf)
+
+#### **Add margin to pages of different PDFs with a range specification**
+
+```js
+import { PdfMarginManipulator } from 'pdf-ops';
+
+(async () => {
+  // create a new object of the PdfMarginManipulator class
+  const marginManipulator = new PdfMarginManipulator();
+
+  // add the margin to different pages of different pdfs like as follows
+  await marginManipulator.addMarginWithRange([
+    {
+      file: 'test_files/pdf1.pdf',
+      range: [[0, 2]],
+      // [top, right, bottom, left]
+      margin: [10, 10, 10, 10],
+    },
+    {
+      file: 'test_files/pdf2.pdf',
+      range: [[2, 4]],
+      margin: [20, 20, 20, 20],
+    },
+    {
+      file: 'test_files/pdf3.pdf',
+      range: [[4, 6]],
+      margin: [30, 30, 30, 30],
+    },
+  ]);
+
+  // save the resultant merged file
+  await marginManipulator.save('test_files/addedMarginWithRange.pdf');
+})();
+```
+
+In this example [pdf1](/example-files/pdf1.pdf), [pdf2](/example-files/pdf2.pdf) and [pdf3](/example-files/pdf3.pdf) will generate [addedMarginWithRange.pdf](/example-files/addedMarginWithRange.pdf)
+
+#### **Merge multiple pdfs with added margin with single object**
+
+- The pdfs with added margin with a single object will be automatically merged in order in which they were manipulated
+
+- The object will not be cleared after saving the file, therefore the pdfs will keep on getting merged into the previously manipulated pdf files
+
+- For clearing the pages in the object use `await marginManipulator.clearDoc()`
+
+- Lets put all this into an example for explanation
+
+```js
+import { PdfMarginManipulator } from 'pdf-ops';
+
+(async () => {
+  // create a new object of the PdfMarginManipulator class
+  const marginManipulator = new PdfMarginManipulator();
+
+  // adding margin to pdf1
+  // the margin should be in the format [top, right, bottom, left]
+  await marginManipulator.addMargin('test_files/pdf1.pdf', [0, 10, 10, 10]);
+
+  // adding margin to some pages of pdf2
+  await marginManipulator.addMarginWithRange([
+    {
+      file: 'test_files/pdf2.pdf',
+      range: [[1, 4]],
+      margin: [10, 0, 10, 10],
+    },
+  ]);
+
+  // saving as addMargin1.pdf
+  await marginManipulator.save('test_files/addMargin1.pdf');
+
+  // adding margin to pdf3
+  await marginManipulator.addMargin('test_files/pdf3.pdf', [10, 10, 0, 10]);
+
+  // saving as addMargin2.pdf
+  await marginManipulator.save('test_files/addMargin2.pdf');
+
+  // clearing add the pages with in the object
+  await marginManipulator.clearDoc();
+
+  // adding margin to some pages of pdf3
+  await marginManipulator.addMarginWithRange([
+    {
+      file: 'test_files/pdf4.pdf',
+      range: [
+        [0, 1],
+        [4, 6],
+      ],
+      margin: [10, 10, 10, 0],
+    },
+  ]);
+
+  // saving as addMargin3.pdf
+  await marginManipulator.save('test_files/addMargin3.pdf');
+})();
+```
+
+- If [pdf1](/example-files/pdf1.pdf), [pdf2](/example-files/pdf2.pdf), [pdf3](/example-files/pdf3.pdf) and [pdf4](/example-files/pdf4.pdf) look like this.
+- then [addMargin1](/example-files/addMargin1.pdf), [addMargin2](/example-files/addMargin2.pdf) and [addMargin3](/example-files/addMargin3.pdf) will look like this.
+
+#### **Get buffer of the resultant pdf with added margin**
+
+- Getting the buffer (Uint8Array) is pretty straight foward. You can access buffer by `await marginManipulator.getPdfBuffer()` and it will return you the buffer of the resultant pdf
+
+```js
+import { PdfMarginManipulator } from 'pdf-ops';
+
+(async () => {
+  const marginManipulator = new PdfMarginManipulator();
+  await marginManipulator.addMargin('test_files/pdf1.pdf', [0, 10, 10, 10]);
+  await marginManipulator.addMarginWithRange([
+    {
+      file: 'test_files/pdf2.pdf',
+      range: [[1, 4]],
+      margin: [10, 0, 10, 10],
+    },
+  ]);
+
+  // to get the buffer of the resultant pdf
+  const buffer = await marginManipulator.getPdfBuffer();
+
+  console.log(buffer);
+})();
+```
+
 ### Convert Pdf to Image
+
+> Note:- You should have node version > 17 for converting pdf to image on you server
 
 #### **Convert all pages of a PDF to images**
 
@@ -924,6 +1076,9 @@ import { PdfToImageConverter } from 'pdf-ops';
   await converter.save('./test_files', 'images3');
 })();
 ```
+
+- If [pdf1](/example-files/pdf1.pdf), [pdf2](/example-files/pdf2.pdf), [pdf3](/example-files/pdf3.pdf), and [pdf4](/example-files/pdf4.pdf) look like this
+- Then [images1](/example-files/images1/), [image2](/example-files/images2/), and [images3](/example-files/images3/) will look like this
 
 #### **Get buffer of the resultant Images**
 
