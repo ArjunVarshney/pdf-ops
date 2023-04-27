@@ -1,6 +1,6 @@
 {
   "name": "pdf-ops",
-  "version": "1.4.0",
+  "version": "1.5.2",
   "description": "Do multile pdf operations with one package",
   "main": "build/index.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "url": "https://github.com/ArjunVarshney/pdf-ops/issues"
   },
   "homepage": "https://github.com/ArjunVarshney/pdf-ops#readme",
-  "types": "build/index.d.ts",
+  "types": "./index.d.ts",
   "files": [
     "build/**/*.js",
     "build/**/*.d.ts",
@@ -55,9 +55,10 @@
     "pdf to png",
     "pdf to jpg",
     "image to pdf",
+    "jpg to pdf",
+    "png to pdf",
     "pdf margin",
     "pdf add margin",
-    "pdf metadata",
-    "jpg to pdf"
+    "pdf metadata"
   ]
 }

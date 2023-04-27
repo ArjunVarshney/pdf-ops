@@ -61,6 +61,7 @@ This node js package is able to perform various pdf tasks as desired and is able
 - Resize PDFs
 - Add Margin to the PDFs
 - Render PDFs to Images
+- Convert images to Pdf
 
 ## Usage Examples
 
