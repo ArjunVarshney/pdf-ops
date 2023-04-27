@@ -39,6 +39,11 @@
     - [Convert pages of different PDFs with range specification](#convert-pages-of-different-pdfs-with-range-specification)
     - [Render images of many different PDFs with single object](#render-images-of-many-different-pdfs-with-single-object)
     - [Get buffer of the resultant Images](#get-buffer-of-the-resultant-images)
+  - [Convert images to PDF](#convert-images-to-pdf)
+    - [Convert all images to pdf](#convert-all-images-to-pdf)
+    - [Possible values in image to pdf options](#possible-values-in-image-to-pdf-options)
+    - [Merge the converted images with single object](#merge-the-converted-images-with-single-object)
+    - [Get buffer of the resultant image inserted pdf](#get-buffer-of-the-resultant-image-inserted-pdf)
 
 ## Description
 
@@ -969,7 +974,8 @@ import { PdfToImageConverter } from 'pdf-ops';
   // Save the folder carrying all the images
   // The first parameter is the path of the directory in which it will get stored
   // The second parameter is the name of the folder
-  await converter.save('./test_files', 'images');
+  // third parameter is the export type (either 'png' or 'jpg'), it is optional
+  await converter.save('./test_files', 'images', 'png');
 })();
 ```
 
@@ -988,9 +994,7 @@ default_render_options = {
 
 // possible values in the options
 // all the resize options can be applied as renderOptions
-type renderOptions = {
-  ...resizeOptions,
-};
+type renderOptions = resizeOptions;
 ```
 
 Refer to [resizeOptions](#possible-values-in-resize-options) for all the list of all the options
@@ -1021,7 +1025,7 @@ import { PdfToImageConverter } from 'pdf-ops';
   ]);
 
   // save the forlder of images
-  await converter.save('./test_files', 'imagesWithRange');
+  await converter.save('./test_files', 'imagesWithRange', 'png');
 })();
 ```
 
@@ -1104,5 +1108,128 @@ import { PdfToImageConverter } from 'pdf-ops';
   const bufferList = converter.getImageBuffer();
 
   console.log(bufferList);
+})();
+```
+
+### Convert images to PDF
+
+#### **Convert all images to pdf**
+
+```js
+import { ImageToPdfConverter } from 'pdf-ops';
+
+(async () => {
+  // create an object of the ImageToPdfConverter class
+  const converter = new ImageToPdfConverter();
+
+  // initialize the options for converting images to pdf
+  const options = {
+    size: 'B3',
+    orientation: 'portrait',
+    mode: 'crop',
+    position: 'bottom-left',
+    opacity: 0.8,
+    margin: [0, 10, 20, 30],
+  };
+
+  // convert the images to pdf
+  await converter.createPdf(
+    ['test_files/images3/img1.png', 'test_files/images3/img2.png', 'test_files/images3/img3.png'],
+    options, // optional to pass see the block below for default values and possible values
+  );
+
+  // save the resultant pdf to desired locations
+  await converter.save('test_files/imgToPdf.pdf');
+})();
+```
+
+If [img1](/example-files/images1/img1.png), [img2](/example-files/images1/img2.png) and [img3](/example-files/images1/img3.png) then [imgToPdf.pdf](/example-files/imgToPdf.pdf) will look like this
+
+#### **Possible values in image to pdf options**
+
+```js
+export type createOptions = resizeOptions & {
+  //refer to resize options for resize options
+  opacity?: number,
+  margin?: [number, number, number, number],
+};
+
+default_create_options = {
+  size: 'do-not-change',
+  orientation: 'portrait',
+  mode: 'shrink-to-fit',
+  position: 'center',
+  opacity: 1,
+  margin: [0, 0, 0, 0],
+};
+```
+
+For resize option click on [this](#possible-values-in-resize-options)
+
+#### **Merge the converted images with single object**
+
+- The images will keep on accumulating if not cleared
+
+- For clearing the object use `await converter.clearDoc()`
+
+```js
+import { ImageToPdfConverter } from 'pdf-ops';
+
+(async () => {
+  // create an object of the ImageToPdfConverter class
+  const converter = new ImageToPdfConverter();
+
+  // convert the images to pdf
+  await converter.createPdf(
+    ['test_files/images3/img1.png', 'test_files/images3/img2.png', 'test_files/images3/img3.png'],
+    {
+      size: 'B3',
+      orientation: 'portrait',
+      margin: [0, 10, 20, 30],
+    },
+  );
+
+  // add images to the already present pages in the object
+  await converter.createPdf(
+    ['test_files/images2/img5.png', 'test_files/images2/img6.png', 'test_files/images2/img7.png'],
+    {
+      size: 'A4',
+      position: 'center-top',
+      margin: [20, 20, 20, 20],
+    },
+  );
+
+  // save the resultant mergeed pdf to desired locations
+  await converter.save('test_files/imgToPdfMerged.pdf');
+})();
+```
+
+If [img1](/example-files/images1/img1.png), [img2](/example-files/images1/img2.png), [img3](/example-files/images1/img3.png), [img5](/example-files/images2/img5.png), [img6](/example-files/images2/img6.png), [img7](/example-files/images2/img7.png) then [imgToPdfMerged.pdf](/example-files/imgToPdf.pdf) will look like this
+
+#### **Get buffer of the resultant image inserted pdf**
+
+- Getting the buffer (Uint8Array) is pretty straight foward. You can access buffer by `converter.getImageBuffer()` and it will return you the array of buffers of the resultant pdf
+
+```js
+import { ImageToPdfConverter } from 'pdf-ops';
+
+(async () => {
+  // create an object of the ImageToPdfConverter class
+  const converter = new ImageToPdfConverter();
+
+  // convert the images to pdf
+  await converter.createPdf(
+    ['test_files/images3/img1.png', 'test_files/images3/img2.png', 'test_files/images3/img3.png'],
+    {
+      size: 'B3',
+      orientation: 'portrait',
+      margin: [0, 10, 20, 30],
+    },
+  );
+
+  // save the resultant mergeed pdf to desired locations
+  const buffer = await converter.getPdfBuffer();
+
+  console.log(buffer);
 })();
 ```

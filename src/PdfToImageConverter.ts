@@ -4,6 +4,7 @@ import { pdfToImage } from './pdf-micro-tools/pdfToImage';
 import { splitPdf } from './pdf-micro-tools/splitPdf';
 import { resizePdf } from './pdf-micro-tools/resizePdf';
 import { resizeOptions } from './types';
+import sharp from 'sharp';
 
 export default class PdfToImageConverter {
   private imgDocs: Uint8Array[] = [];
@@ -53,7 +54,7 @@ export default class PdfToImageConverter {
       if (!images) return;
       this.imgDocs.push(...images);
     } catch (err) {
-      throw new Error(`Error resizing the pdf: ${err}`);
+      throw new Error(`Error rendering the pdf: ${err}`);
     }
   }
 
@@ -81,19 +82,25 @@ export default class PdfToImageConverter {
         }
       }
     } catch (err) {
-      throw new Error(`Error resizing the pdf: ${err}`);
+      throw new Error(`Error rendering the pdf: ${err}`);
     }
   }
 
   // To save the resultant pdf in the file system
-  async save(dirpath: string, dirname: string) {
+  async save(dirpath: string, dirname: string, exportType: 'png' | 'jpg' = 'png') {
     try {
       if (!(fs.existsSync(`${dirpath}/${dirname}`) && fs.lstatSync(`${dirpath}/${dirname}`).isDirectory())) {
         await fs.promises.mkdir(`${dirpath}/${dirname}`);
       }
 
       for (const [index, img] of this.imgDocs.entries()) {
-        await fs.promises.writeFile(`${dirpath}/${dirname}/img${index + 1}.png`, img);
+        if (exportType === 'png')
+          await fs.promises.writeFile(`${dirpath}/${dirname}/img${index + 1}.${exportType}`, img);
+        else
+          await fs.promises.writeFile(
+            `${dirpath}/${dirname}/img${index + 1}.${exportType}`,
+            await sharp(img).jpeg().toBuffer(),
+          );
       }
     } catch (err) {
       throw new Error(`Error saving files to directory ${dirpath}/${dirname}: ${err}`);

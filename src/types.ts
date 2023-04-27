@@ -65,3 +65,8 @@ export type resizeOptions = {
     | 'center-top'
     | 'center-bottom';
 };
+
+export type createOptions = resizeOptions & {
+  opacity?: number;
+  margin?: [number, number, number, number];
+};
