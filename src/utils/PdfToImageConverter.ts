@@ -1,14 +1,17 @@
 import fs from 'fs';
 import { PDFDocument } from 'pdf-lib';
-import { pdfToImage } from './pdf-micro-tools/pdfToImage';
-import { splitPdf } from './pdf-micro-tools/splitPdf';
-import { resizePdf } from './pdf-micro-tools/resizePdf';
-import { resizeOptions } from './types';
+import { pdfToImage } from '../pdf-micro-tools/pdfToImage';
+import { splitPdf } from '../pdf-micro-tools/splitPdf';
+import { resizePdf } from '../pdf-micro-tools/resizePdf';
+import { range, resizeOptions } from '../types';
 import sharp from 'sharp';
+import PdfManipulator from '../PdfManipulator';
 
-export default class PdfToImageConverter {
+export default class PdfToImageConverter extends PdfManipulator {
   private imgDocs: Uint8Array[] = [];
+
   constructor() {
+    super();
     this.clearDoc();
   }
 
@@ -20,17 +23,6 @@ export default class PdfToImageConverter {
   // Getter for the pdfDocs array
   getDocs() {
     return this.imgDocs;
-  }
-
-  // To read the pdf file from the file system and convert it to a PDFDocument object
-  private async readDoc(filepath: string): Promise<PDFDocument> {
-    try {
-      const fileBuffer = await fs.promises.readFile(filepath);
-      const file = await PDFDocument.load(fileBuffer);
-      return file;
-    } catch (err) {
-      throw new Error(`Error reading file ${filepath}: ${err}`);
-    }
   }
 
   // to render all the pages of the Given pdf to image
@@ -62,7 +54,7 @@ export default class PdfToImageConverter {
   async renderToImageWithRange(
     orderList: {
       file: string | PDFDocument;
-      range: [number, number][];
+      range: range;
       options?: resizeOptions;
     }[],
   ) {
@@ -75,7 +67,8 @@ export default class PdfToImageConverter {
           pdf = part.file;
         }
 
-        const splitted = await splitPdf(pdf, part.range);
+        const r = this.processOrder(part.range, pdf.getPageCount());
+        const splitted = await splitPdf(pdf, r);
 
         for (const doc of splitted) {
           await this.renderToImage(doc, part.options);
@@ -87,7 +80,8 @@ export default class PdfToImageConverter {
   }
 
   // To save the resultant pdf in the file system
-  async save(dirpath: string, dirname: string, exportType: 'png' | 'jpg' = 'png') {
+  // @ts-ignore
+  async save(dirpath: string, dirname: string, exportType: 'png' | 'jpg' = 'png', basename: string = 'img') {
     try {
       if (!(fs.existsSync(`${dirpath}/${dirname}`) && fs.lstatSync(`${dirpath}/${dirname}`).isDirectory())) {
         await fs.promises.mkdir(`${dirpath}/${dirname}`);
@@ -95,7 +89,7 @@ export default class PdfToImageConverter {
 
       for (const [index, img] of this.imgDocs.entries()) {
         if (exportType === 'png')
-          await fs.promises.writeFile(`${dirpath}/${dirname}/img${index + 1}.${exportType}`, img);
+          await fs.promises.writeFile(`${dirpath}/${dirname}/${basename}${index + 1}.${exportType}`, img);
         else
           await fs.promises.writeFile(
             `${dirpath}/${dirname}/img${index + 1}.${exportType}`,

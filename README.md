@@ -44,6 +44,7 @@
     - [Possible values in image to pdf options](#possible-values-in-image-to-pdf-options)
     - [Merge the converted images with single object](#merge-the-converted-images-with-single-object)
     - [Get buffer of the resultant image inserted pdf](#get-buffer-of-the-resultant-image-inserted-pdf)
+  - [Rules for specifying the range array](#rules-for-specifying-range)
 
 ## Description
 
@@ -100,11 +101,9 @@ import { PdfSplitter } from 'pdf-ops';
   const splitter = new PdfSplitter();
 
   // Split the desired pdf into desired parts
-  await splitter.splitWithRange('test_files/pdf2.pdf', [
-    [0, 1],
-    [1, 3],
-    [3, 6],
-  ]);
+  // Reverse selection will separate each page within the selection
+  // read the rules for specifying range
+  await splitter.splitWithRange('test_files/pdf2.pdf', [1, [2, 3], [4, 6], ['end', 3]]);
 
   // Save the folder carrying all the pdfs
   // The first parameter is the path of the directory in which it will get stored
@@ -134,8 +133,8 @@ import { PdfSplitter } from 'pdf-ops';
 
   // Splitting pdf1 into two pdfs
   await splitter.splitWithRange('test_files/pdf1.pdf', [
-    [0, 3],
-    [3, 6],
+    [1, 3],
+    [4, 6],
   ]);
 
   // Splitting pdf2 into single paged pdfs
@@ -146,11 +145,7 @@ import { PdfSplitter } from 'pdf-ops';
   await splitter.save('./test_files', 'split1');
 
   // Splitting pdf4 into 3 parts and putting it into same object
-  await splitter.splitWithRange('test_files/pdf4.pdf', [
-    [0, 2],
-    [2, 4],
-    [4, 6],
-  ]);
+  await splitter.split('test_files/pdf4.pdf');
 
   // Saving the pdfs in the folder named split2
   await splitter.save('./test_files', 'split2');
@@ -159,14 +154,7 @@ import { PdfSplitter } from 'pdf-ops';
   await splitter.clearDoc();
 
   // Splitting pdf3 in reverse order
-  await splitter.splitWithRange('test_files/pdf3.pdf', [
-    [5, 6],
-    [4, 5],
-    [3, 4],
-    [2, 3],
-    [1, 2],
-    [0, 1],
-  ]);
+  await splitter.splitWithRange('test_files/pdf3.pdf', [['end', 'start']]);
 
   // Saving the pdfs in the folder named split3
   await splitter.save('./test_files', 'split3');
@@ -183,9 +171,9 @@ import { PdfMerger, PdfSplitter } from 'pdf-ops';
 
 (async () => {
   const splitter = new PdfSplitter();
-  await splitter.splitWithRange('test_files/pdf1.pdf', [[0, 3]]);
+  await splitter.splitWithRange('test_files/pdf1.pdf', [[1, 3]]);
   await splitter.split('test_files/pdf2.pdf');
-  await splitter.splitWithRange('test_files/pdf1.pdf', [[3, 6]]);
+  await splitter.splitWithRange('test_files/pdf1.pdf', [[4, 6]]);
 
   // To merge the pdfs in the splitter
   // Make an object of PdfMerger
@@ -213,9 +201,9 @@ import { PdfSplitter } from 'pdf-ops';
   const splitter = new PdfSplitter();
 
   // Split the desired pdfs
-  await splitter.splitWithRange('test_files/pdf1.pdf', [[0, 3]]);
+  await splitter.splitWithRange('test_files/pdf1.pdf', [[1, 3]]);
   await splitter.split('test_files/pdf2.pdf');
-  await splitter.splitWithRange('test_files/pdf1.pdf', [[3, 6]]);
+  await splitter.splitWithRange('test_files/pdf1.pdf', [[4, 6]]);
 
   // Get pdf buffer
   const bufferList = await splitter.getPdfBuffer();
@@ -255,27 +243,23 @@ import { PdfMerger } from 'pdf-ops';
   const merger = new PdfMerger();
 
   // Specify the filepath with the range
-  // The range works just like array indexing
-  // [start, end] start page is included and end page is excluded
+  // read the rules to specify range
   await merger.mergeWithRange([
     {
       filepath: 'test_files/pdf4.pdf',
-      range: [
-        [0, 1],
-        [5, 6],
-      ],
+      range: [1, 5],
     },
     {
       filepath: 'test_files/pdf1.pdf',
-      range: [[0, 2]],
+      range: [1, 2],
     },
     {
       filepath: 'test_files/pdf2.pdf',
-      range: [[2, 4]],
+      range: [3, 4],
     },
     {
       filepath: 'test_files/pdf3.pdf',
-      range: [[4, 6]],
+      range: [5, 6],
     },
   ]);
 
@@ -285,6 +269,8 @@ import { PdfMerger } from 'pdf-ops';
 ```
 
 In this example [pdf1](/example-files/pdf1.pdf), [pdf2](/example-files/pdf2.pdf), [pdf3](/example-files/pdf3.pdf), and [pdf4](/example-files/pdf4.pdf) will generate [mergedWithRange.pdf](/example-files/mergedWithRange.pdf)
+
+[rules to specify range](#rules-for-specifying-range)
 
 #### **Merge multiple PDFs multiple times with a single object**
 
@@ -307,11 +293,11 @@ import { PdfMerger } from 'pdf-ops';
   await merger.mergeWithRange([
     {
       filepath: 'test_files/pdf1.pdf',
-      range: [[0, 2]],
+      range: [1, 2],
     },
     {
       filepath: 'test_files/pdf2.pdf',
-      range: [[4, 6]],
+      range: [5, 6],
     },
   ]);
 
@@ -325,7 +311,7 @@ import { PdfMerger } from 'pdf-ops';
   await merger.mergeWithRange([
     {
       filepath: 'test_files/pdf3.pdf',
-      range: [[1, 4]],
+      range: [[2, 4]],
     },
   ]);
 
@@ -339,31 +325,19 @@ import { PdfMerger } from 'pdf-ops';
   await merger.mergeWithRange([
     {
       filepath: 'test_files/pdf1.pdf',
-      range: [
-        [0, 1],
-        [5, 6],
-      ],
+      range: [1, 6],
     },
     {
       filepath: 'test_files/pdf2.pdf',
-      range: [
-        [0, 1],
-        [5, 6],
-      ],
+      range: [1, 6],
     },
     {
       filepath: 'test_files/pdf3.pdf',
-      range: [
-        [0, 1],
-        [5, 6],
-      ],
+      range: [1, 6],
     },
     {
       filepath: 'test_files/pdf4.pdf',
-      range: [
-        [0, 1],
-        [5, 6],
-      ],
+      range: [1, 6],
     },
   ]);
   // saving it as merge3.pdf
@@ -386,8 +360,8 @@ import { PdfMerger } from 'pdf-ops';
 
   // Merge the desired pdfs
   await merger.mergeWithRange([
-    { filepath: 'test_files/pdf1.pdf', range: [[0, 2]] },
-    { filepath: 'test_files/pdf2.pdf', range: [[4, 6]] },
+    { filepath: 'test_files/pdf1.pdf', range: [1, 2] },
+    { filepath: 'test_files/pdf2.pdf', range: [5, 6] },
   ]);
   await merger.merge(['test_files/pdf4.pdf']);
 
@@ -436,30 +410,19 @@ import { PdfRotator } from 'pdf-ops';
     {
       // give the filepath inside the file field
       file: 'test_files/pdf1.pdf',
-      // range is a list of range of pages
-      // the range is specified as [start, end]
-      // start page is included and end page is excluded
-      range: [
-        [0, 2],
-        [4, 6],
-      ],
+      // range is a list to specify the pages of the pdf (read the rules for specifying this list)
+      range: [1, 2, 5, 6],
       // degree should be a multiple of 90
       degree: 90,
     },
     {
       file: 'test_files/pdf2.pdf',
-      range: [
-        [0, 1],
-        [4, 5],
-      ],
+      range: [1, 5],
       degree: -90,
     },
     {
       file: 'test_files/pdf3.pdf',
-      range: [
-        [4, 6],
-        [0, 2],
-      ],
+      range: [5, 6, 1, 2],
       degree: 180,
     },
   ]);
@@ -495,7 +458,7 @@ import { PdfRotator } from 'pdf-ops';
   await rotator.rotateWithRange([
     {
       file: 'test_files/pdf3.pdf',
-      range: [[1, 5]],
+      range: [[2, 5]],
       degree: 180,
     },
   ]);
@@ -507,10 +470,7 @@ import { PdfRotator } from 'pdf-ops';
   await rotator.rotateWithRange([
     {
       file: 'test_files/pdf2.pdf',
-      range: [
-        [0, 1],
-        [5, 6],
-      ],
+      range: [1, 6],
       degree: -90,
     },
   ]);
@@ -547,7 +507,7 @@ import { PdfRotator } from 'pdf-ops';
   await rotator.rotateWithRange([
     {
       file: 'test_files/pdf3.pdf',
-      range: [[1, 5]],
+      range: [[2, 5]],
       degree: 180,
     },
   ]);
@@ -684,7 +644,7 @@ import { PdfResizer } from 'pdf-ops';
   await resizer.resizeWithRange([
     {
       file: 'test_files/pdf1.pdf',
-      range: [[2, 5]],
+      range: [[3, 5]],
       // refer to the resize options for possible allowed values
       options: {
         size: 'Letter',
@@ -693,7 +653,7 @@ import { PdfResizer } from 'pdf-ops';
     },
     {
       file: 'test_files/pdf4.pdf',
-      range: [[1, 3]],
+      range: [[2, 3]],
       options: {
         size: 'A5',
         mode: 'crop',
@@ -736,10 +696,7 @@ import { PdfResizer } from 'pdf-ops';
   await resizer.resizeWithRange([
     {
       file: 'test_files/pdf4.pdf',
-      range: [
-        [0, 2],
-        [4, 5],
-      ],
+      range: [1, 2, 5],
       options: { size: 'A5' },
     },
   ]);
@@ -764,7 +721,7 @@ import { PdfResizer } from 'pdf-ops';
   await resizer.resizeWithRange([
     {
       file: 'test_files/pdf2.pdf',
-      range: [[1, 3]],
+      range: [2, 3],
     },
   ]);
 
@@ -789,7 +746,7 @@ import { PdfResizer } from 'pdf-ops';
   await resizer.resizeWithRange([
     {
       file: 'test_files/pdf4.pdf',
-      range: [[0, 2]],
+      range: [1, 2],
       options: { size: 'A5' },
     },
   ]);
@@ -835,18 +792,18 @@ import { PdfMarginManipulator } from 'pdf-ops';
   await marginManipulator.addMarginWithRange([
     {
       file: 'test_files/pdf1.pdf',
-      range: [[0, 2]],
+      range: [1, 2],
       // [top, right, bottom, left]
       margin: [10, 10, 10, 10],
     },
     {
       file: 'test_files/pdf2.pdf',
-      range: [[2, 4]],
+      range: [3, 4],
       margin: [20, 20, 20, 20],
     },
     {
       file: 'test_files/pdf3.pdf',
-      range: [[4, 6]],
+      range: [5, 6],
       margin: [30, 30, 30, 30],
     },
   ]);
@@ -883,7 +840,7 @@ import { PdfMarginManipulator } from 'pdf-ops';
   await marginManipulator.addMarginWithRange([
     {
       file: 'test_files/pdf2.pdf',
-      range: [[1, 4]],
+      range: [[2, 4]],
       margin: [10, 0, 10, 10],
     },
   ]);
@@ -904,10 +861,7 @@ import { PdfMarginManipulator } from 'pdf-ops';
   await marginManipulator.addMarginWithRange([
     {
       file: 'test_files/pdf4.pdf',
-      range: [
-        [0, 1],
-        [4, 6],
-      ],
+      range: [1, 5, 6],
       margin: [10, 10, 10, 0],
     },
   ]);
@@ -933,7 +887,7 @@ import { PdfMarginManipulator } from 'pdf-ops';
   await marginManipulator.addMarginWithRange([
     {
       file: 'test_files/pdf2.pdf',
-      range: [[1, 4]],
+      range: [[2, 4]],
       margin: [10, 0, 10, 10],
     },
   ]);
@@ -1013,15 +967,12 @@ import { PdfToImageConverter } from 'pdf-ops';
   await converter.renderToImageWithRange([
     {
       file: 'test_files/pdf2.pdf',
-      range: [
-        [0, 2],
-        [5, 6],
-      ],
+      range: [1, 2, 6],
       options: { size: 'A4' },
     },
     {
       file: 'test_files/pdf3.pdf',
-      range: [[2, 4]],
+      range: [3, 4],
     },
   ]);
 
@@ -1055,10 +1006,7 @@ import { PdfToImageConverter } from 'pdf-ops';
   await converter.renderToImageWithRange([
     {
       file: 'test_files/pdf2.pdf',
-      range: [
-        [1, 2],
-        [4, 6],
-      ],
+      range: [2, 5, 6],
     },
   ]);
 
@@ -1075,7 +1023,7 @@ import { PdfToImageConverter } from 'pdf-ops';
   await converter.clearDoc();
 
   // render some pages of pdf4
-  await converter.renderToImageWithRange([{ file: 'test_files/pdf4.pdf', range: [[1, 5]] }]);
+  await converter.renderToImageWithRange([{ file: 'test_files/pdf4.pdf', range: [[2, 5]] }]);
 
   // save inside images3 folder
   await converter.save('./test_files', 'images3');
@@ -1098,10 +1046,7 @@ import { PdfToImageConverter } from 'pdf-ops';
   await converter.renderToImageWithRange([
     {
       file: 'test_files/pdf2.pdf',
-      range: [
-        [1, 2],
-        [4, 6],
-      ],
+      range: [2, 5, 6],
     },
   ]);
 
@@ -1228,9 +1173,28 @@ import { ImageToPdfConverter } from 'pdf-ops';
     },
   );
 
-  // save the resultant mergeed pdf to desired locations
   const buffer = await converter.getPdfBuffer();
 
   console.log(buffer);
 })();
 ```
+
+### Rules for specifying range
+
+- Single Page Selection: To select a single page, specify the page number as an integer. For example: [1] selects page 1.
+
+- Multiple Page Selection: To select multiple non-consecutive pages, list the page numbers as separate integers within square brackets. For example: [1, 2, 3] selects pages 1, 2, and 3.
+
+- Page Range Selection: To select a range of consecutive pages, specify the starting and ending page numbers as a two-element array within square brackets. For example: [5, 10] selects pages 5 to 10, inclusive.
+
+- Mixed Page Selection: To select a combination of single pages, page ranges, and the start or end of the PDF, provide them as separate elements in the array. For example: [1, 2, 3, [6, 10], [7, "end"]] selects pages 1, 2, 3, 6 to 10, page 7 to the end of the PDF.
+
+  - To select from a specific page to the end of the PDF, use the string "end" as the second element in the array. For example: [7, "end"] selects page 7 to the end of the PDF.
+
+  - To select from the start of the PDF to a specific page, use the string "start" as the first element in the array. For example: ["start", 3] selects from the start of the PDF to page 3.
+
+- Reverse Page Selection: To select pages in reverse order, specify the page numbers in reverse order within a two-element array.
+
+  - To select a range of pages in reverse order, provide the ending page number as the first element and the starting page number as the second element in the array. For example: [10, 6] selects pages 10 to 6 in reverse order.
+
+  - To select from a specific page to the beginning of the PDF in reverse, use the "start" keyword as the second element and the page number as the first element in the array. For example: [4, "start"] selects page 4 to the beginning of the PDF in reverse order.

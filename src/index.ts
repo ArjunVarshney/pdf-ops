@@ -1,10 +1,10 @@
-import PdfMerger from './PdfMerger';
-import PdfSplitter from './PdfSplitter';
-import PdfRotator from './PdfRotator';
-import PdfResizer from './PdfResizer';
-import PdfToImageConverter from './PdfToImageConverter';
-import PdfMarginManipulator from './PdfMarginManipulator';
-import ImageToPdfConverter from './ImageToPdfConverter';
+import PdfMerger from './utils/PdfMerger';
+import PdfSplitter from './utils/PdfSplitter';
+import PdfRotator from './utils/PdfRotator';
+import PdfResizer from './utils/PdfResizer';
+import PdfToImageConverter from './utils/PdfToImageConverter';
+import PdfMarginManipulator from './utils/PdfMarginManipulator';
+import ImageToPdfConverter from './utils/ImageToPdfConverter';
 
 export {
   PdfMerger,

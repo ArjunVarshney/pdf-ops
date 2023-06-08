@@ -1,3 +1,5 @@
+export type range = (number | [number | 'start' | 'end', number | 'start' | 'end'])[];
+
 export type resizeOptions = {
   size?:
     | [number, number]
