@@ -1,4 +1,8 @@
+import { PDFDocument } from 'pdf-lib';
+
 export type range = (number | [number | 'start' | 'end', number | 'start' | 'end'])[];
+
+export type fileType = string | File | ArrayBuffer | PDFDocument | Uint8Array;
 
 export type resizeOptions = {
   size?:

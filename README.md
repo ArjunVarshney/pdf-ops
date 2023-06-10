@@ -45,6 +45,7 @@
     - [Merge the converted images with single object](#merge-the-converted-images-with-single-object)
     - [Get buffer of the resultant image inserted pdf](#get-buffer-of-the-resultant-image-inserted-pdf)
   - [Rules for specifying the range array](#rules-for-specifying-range)
+  - [File Input](#file-input)
 
 ## Description
 
@@ -1198,3 +1199,12 @@ import { ImageToPdfConverter } from 'pdf-ops';
   - To select a range of pages in reverse order, provide the ending page number as the first element and the starting page number as the second element in the array. For example: [10, 6] selects pages 10 to 6 in reverse order.
 
   - To select from a specific page to the beginning of the PDF in reverse, use the "start" keyword as the second element and the page number as the first element in the array. For example: [4, "start"] selects page 4 to the beginning of the PDF in reverse order.
+
+### File input
+
+- You can give any of the follow type as input to the variable:
+  - string: Path of the file in the file system
+  - File: input file from the DOM
+  - ArrayBuffer: Input file using fs module
+  - Uint8Array: Input file using fs module
+  - PDFDocument: PDFDocument object from pdf-lib

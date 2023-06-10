@@ -1,6 +1,6 @@
 import { PDFDocument } from 'pdf-lib';
 import fs from 'fs';
-import { range } from './types';
+import { fileType, range } from './types';
 
 export default class PdfManipulator {
   protected pdfDoc: PDFDocument | undefined;
@@ -66,14 +66,44 @@ export default class PdfManipulator {
     return finalOrder;
   }
 
+  protected createFileBuffer(file: File): Promise<ArrayBuffer> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const buffer = reader.result;
+        if (buffer && buffer instanceof ArrayBuffer) resolve(buffer);
+      };
+
+      reader.onerror = (error) => {
+        reject(error);
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
   // To read the pdf file from the file system and convert it to a PDFDocument object
-  protected async readDoc(filepath: string): Promise<PDFDocument> {
+  protected async readDoc(file: fileType): Promise<PDFDocument> {
     try {
-      const fileBuffer = await fs.promises.readFile(filepath);
-      const file = await PDFDocument.load(fileBuffer);
-      return file;
+      let fileBuffer: ArrayBuffer | Uint8Array;
+
+      if (file instanceof PDFDocument) return file;
+
+      if (typeof file === 'string') {
+        fileBuffer = await fs.promises.readFile(file);
+      } else if (file instanceof ArrayBuffer || file instanceof Uint8Array) {
+        fileBuffer = file;
+      } else if (file instanceof File) {
+        fileBuffer = await this.createFileBuffer(file);
+      } else {
+        throw new Error(`Error reading file ${file}`);
+      }
+
+      const pdfdoc = await PDFDocument.load(fileBuffer);
+      return pdfdoc;
     } catch (err) {
-      throw new Error(`Error reading file ${filepath}: ${err}`);
+      throw new Error(`Error reading file ${file}: ${err}`);
     }
   }
 

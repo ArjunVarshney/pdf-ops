@@ -19,7 +19,7 @@ export default class ImageToPdfConverter extends PdfManipulator {
   }
 
   // To create pdf from the given array of objects
-  async createPdf(files: string[] | Uint8Array[], options?: createOptions) {
+  async createPdf(files: (string | Uint8Array | File)[], options?: createOptions) {
     try {
       options = {
         size: 'do-not-change',
@@ -35,6 +35,8 @@ export default class ImageToPdfConverter extends PdfManipulator {
       for (const file of files) {
         if (typeof file === 'string') {
           imgs.push(await this.readDoc(file));
+        } else if (file instanceof File) {
+          imgs.push(new Uint8Array(await this.createFileBuffer(file)));
         } else {
           imgs.push(file);
         }

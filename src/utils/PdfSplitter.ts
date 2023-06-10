@@ -2,7 +2,7 @@ import fs from 'fs';
 import { PDFDocument } from 'pdf-lib';
 import { splitPdf } from '../pdf-micro-tools/splitPdf';
 import PdfManipulator from '../PdfManipulator';
-import { range } from '../types';
+import { fileType, range } from '../types';
 
 export default class PdfSplitter extends PdfManipulator {
   private pdfDocs: PDFDocument[];
@@ -23,7 +23,7 @@ export default class PdfSplitter extends PdfManipulator {
   }
 
   // To split the pdf from the file system into single paged Pdfs
-  async split(filepath: string) {
+  async split(filepath: fileType) {
     try {
       const pdf = await this.readDoc(filepath);
       const rangeArr: [number, number][] = [];
@@ -38,7 +38,7 @@ export default class PdfSplitter extends PdfManipulator {
   }
 
   // To split the pdf from the file system based on the given range
-  async splitWithRange(filepath: string, ranges: range) {
+  async splitWithRange(filepath: fileType, ranges: range) {
     try {
       const pdf = await this.readDoc(filepath);
       const r = this.processOrder(ranges, pdf.getPageCount());

@@ -1,19 +1,14 @@
-import { PDFDocument } from 'pdf-lib';
 import { extendPdf } from '../pdf-micro-tools/extendPdf';
 import { marginPdf } from '../pdf-micro-tools/marginPdf';
 import { splitPdf } from '../pdf-micro-tools/splitPdf';
 import PdfManipulator from '../PdfManipulator';
-import { range } from '../types';
+import { fileType, range } from '../types';
 
 export default class PdfMarginManipulator extends PdfManipulator {
   // To add margin to the pdf
-  async addMargin(file: string | PDFDocument, margin: [number, number, number, number]) {
+  async addMargin(file: fileType, margin: [number, number, number, number]) {
     let pdf;
-    if (typeof file === 'string') {
-      pdf = await this.readDoc(file);
-    } else {
-      pdf = file;
-    }
+    pdf = await this.readDoc(file);
 
     pdf = await marginPdf(pdf, margin);
 
@@ -30,7 +25,7 @@ export default class PdfMarginManipulator extends PdfManipulator {
   // To add the margin to the pdf with specified range
   async addMarginWithRange(
     orderList: {
-      file: string | PDFDocument;
+      file: fileType;
       range: range;
       margin: [number, number, number, number];
     }[],
@@ -38,11 +33,7 @@ export default class PdfMarginManipulator extends PdfManipulator {
     try {
       for (const part of orderList) {
         let pdf;
-        if (typeof part.file === 'string') {
-          pdf = await this.readDoc(part.file);
-        } else {
-          pdf = part.file;
-        }
+        pdf = await this.readDoc(part.file);
 
         const r = this.processOrder(part.range, pdf.getPageCount());
         const splitted = await splitPdf(pdf, r);
