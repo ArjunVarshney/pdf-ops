@@ -1,5 +1,4 @@
 import { PDFDocument } from 'pdf-lib';
-import fs from 'fs';
 import { fileType, range } from './types';
 
 export default class PdfManipulator {
@@ -26,10 +25,18 @@ export default class PdfManipulator {
     }
   }
 
-  protected processOrder(order: range, pageCount: number) {
+  protected processOrder(order: range, pageCount: number, allowRev: boolean = true) {
     const finalOrder: [number, number][] = [];
-    for (const pageRange of order) {
+    for (let pageRange of order) {
       // if a range is provided
+      if (
+        typeof pageRange === 'object' &&
+        pageRange[0] === pageRange[1] &&
+        pageRange[0] !== 'start' &&
+        pageRange[0] !== 'end'
+      ) {
+        pageRange = pageRange[0];
+      }
       if (typeof pageRange === 'object') {
         // change the end and start to 0 or n
         if (pageRange[0] === 'end') {
@@ -44,22 +51,22 @@ export default class PdfManipulator {
         }
 
         // if the range of order is in reverse reverese the pages
-        if (pageRange[0] > pageRange[1]) {
+        if (pageRange[0] > pageRange[1] && allowRev && pageRange[0] <= pageCount) {
           for (let i = pageRange[0]; i >= pageRange[1]; i--) {
             finalOrder.push([i - 1, i]);
           }
         }
         // if the range of the page is in correct order
-        else if (pageRange[0] < pageRange[1]) {
+        else if (pageRange[0] < pageRange[1] && pageRange[1] <= pageCount) {
           finalOrder.push([pageRange[0] - 1, pageRange[1]]);
         }
         // if the first and last of the order are same then consider it as a single digit
-        else {
-          finalOrder.push([pageRange[0], pageRange[0] + 1]);
+        else if (pageRange[0] == pageRange[1] && pageRange[0] <= pageCount) {
+          finalOrder.push([pageRange[0] - 1, pageRange[0]]);
         }
       }
       // if a single number is provided
-      else if (typeof pageRange === 'number') {
+      else if (typeof pageRange === 'number' && pageRange <= pageCount) {
         finalOrder.push([pageRange - 1, pageRange]);
       }
     }
@@ -82,6 +89,23 @@ export default class PdfManipulator {
       reader.readAsArrayBuffer(file);
     });
   }
+  protected blobToUint8Array(blob: Blob): Promise<Uint8Array> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        if (!reader.result || typeof reader.result === 'string') return;
+        const uint8Array = new Uint8Array(reader.result);
+        resolve(uint8Array);
+      };
+
+      reader.onerror = (error) => {
+        reject(error);
+      };
+
+      reader.readAsArrayBuffer(blob);
+    });
+  }
 
   // To read the pdf file from the file system and convert it to a PDFDocument object
   protected async readDoc(file: fileType): Promise<PDFDocument> {
@@ -90,12 +114,12 @@ export default class PdfManipulator {
 
       if (file instanceof PDFDocument) return file;
 
-      if (typeof file === 'string') {
-        fileBuffer = await fs.promises.readFile(file);
-      } else if (file instanceof ArrayBuffer || file instanceof Uint8Array) {
+      if (file instanceof ArrayBuffer || file instanceof Uint8Array) {
         fileBuffer = file;
       } else if (file instanceof File) {
         fileBuffer = await this.createFileBuffer(file);
+      } else if (file instanceof Blob) {
+        fileBuffer = await this.blobToUint8Array(file);
       } else {
         throw new Error(`Error reading file ${file}`);
       }
@@ -104,18 +128,6 @@ export default class PdfManipulator {
       return pdfdoc;
     } catch (err) {
       throw new Error(`Error reading file ${file}: ${err}`);
-    }
-  }
-
-  // To export the generated file as a pdf into the file system
-  async save(filepath: string) {
-    if (this.pdfDoc) {
-      try {
-        const pdfBuffer = await this.pdfDoc.save();
-        await fs.promises.writeFile(filepath, pdfBuffer);
-      } catch (err) {
-        throw new Error(`Error saving PDF to ${filepath}: ${err}`);
-      }
     }
   }
 

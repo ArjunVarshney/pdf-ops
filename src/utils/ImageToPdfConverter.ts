@@ -1,4 +1,3 @@
-import fs from 'fs';
 import { extendPdf } from '../pdf-micro-tools/extendPdf';
 import { imageToPdf } from '../pdf-micro-tools/imageToPdf';
 import { createOptions } from '../types';
@@ -7,19 +6,8 @@ import { marginPdf } from '../pdf-micro-tools/marginPdf';
 import PdfManipulator from '../PdfManipulator';
 
 export default class ImageToPdfConverter extends PdfManipulator {
-  // To read the pdf file from the file system and convert it to a PDFDocument object
-  // @ts-ignore
-  private async readDoc(file: string): Promise<Uint8Array> {
-    try {
-      const fileBuffer = await fs.promises.readFile(file);
-      return fileBuffer;
-    } catch (err) {
-      throw new Error(`Error reading file ${file}: ${err}`);
-    }
-  }
-
   // To create pdf from the given array of objects
-  async createPdf(files: (string | Uint8Array | File)[], options?: createOptions) {
+  async createPdf(files: (Uint8Array | File | ArrayBuffer)[], options?: createOptions) {
     try {
       options = {
         size: 'do-not-change',
@@ -33,12 +21,10 @@ export default class ImageToPdfConverter extends PdfManipulator {
 
       const imgs: Uint8Array[] = [];
       for (const file of files) {
-        if (typeof file === 'string') {
-          imgs.push(await this.readDoc(file));
-        } else if (file instanceof File) {
+        if (file instanceof File) {
           imgs.push(new Uint8Array(await this.createFileBuffer(file)));
         } else {
-          imgs.push(file);
+          imgs.push(new Uint8Array(file));
         }
       }
 

@@ -1,5 +1,5 @@
+import Jimp from 'jimp';
 import { PDFDocument, PDFImage } from 'pdf-lib';
-import sharp from 'sharp';
 
 export const imageToPdf = async (images: Uint8Array[]) => {
   try {
@@ -11,12 +11,13 @@ export const imageToPdf = async (images: Uint8Array[]) => {
       let drawable: PDFImage;
 
       // check if the image is a jpeg of png
-      const type = (await sharp(image).metadata()).format;
+      const img = await Jimp.read(Buffer.from(image));
+      const type = img.getMIME();
 
-      if (type === 'png') {
+      if (type === 'image/png') {
         // if png then use embedPng
         drawable = await newPdf.embedPng(image);
-      } else if (type === 'jpg' || type === 'jpeg') {
+      } else if (type === 'image/jpg' || type === 'image/jpeg') {
         // if jpeg of jpg use embedJpg
         drawable = await newPdf.embedJpg(image);
       } else {

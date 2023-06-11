@@ -49,22 +49,6 @@ export default class PdfSplitter extends PdfManipulator {
     }
   }
 
-  // To save the resultant pdf in the file system
-  // @ts-ignore
-  async save(dirpath: string, dirname: string, basename: string = 'split') {
-    try {
-      if (!(fs.existsSync(`${dirpath}/${dirname}`) && fs.lstatSync(`${dirpath}/${dirname}`).isDirectory())) {
-        await fs.promises.mkdir(`${dirpath}/${dirname}`);
-      }
-      for (const [index, pdf] of this.pdfDocs.entries()) {
-        const buffer = await pdf.save();
-        await fs.promises.writeFile(`${dirpath}/${dirname}/${basename}${index + 1}.pdf`, buffer);
-      }
-    } catch (err) {
-      throw new Error(`Error saving files to directory ${dirpath}/${dirname}: ${err}`);
-    }
-  }
-
   // To return the buffer of the resultant pdfBuffer
   // @ts-ignore
   async getPdfBuffer(): Promise<Uint8Array[]> {
