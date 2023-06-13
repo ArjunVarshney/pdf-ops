@@ -34,7 +34,7 @@ export default class PdfRotator extends PdfManipulator {
         const rtemp = [...r];
         rtemp.sort((a, b) => a[0] - b[0]);
 
-        if (rtemp === r) {
+        if (rtemp.length === r.length && rtemp.every((value, index) => value === r[index])) {
           for (let i = 0; i < r.length - 1; i++) {
             if (r[i][1] < r[i + 1][0]) {
               r.splice(i + 1, 0, [r[i][1], r[i + 1][0]]);

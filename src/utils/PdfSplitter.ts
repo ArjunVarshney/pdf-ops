@@ -1,4 +1,3 @@
-import fs from 'fs';
 import { PDFDocument } from 'pdf-lib';
 import { splitPdf } from '../pdf-micro-tools/splitPdf';
 import PdfManipulator from '../PdfManipulator';
@@ -41,7 +40,7 @@ export default class PdfSplitter extends PdfManipulator {
   async splitWithRange(filepath: fileType, ranges: range) {
     try {
       const pdf = await this.readDoc(filepath);
-      const r = this.processOrder(ranges, pdf.getPageCount());
+      const r = this.processOrder(ranges, pdf.getPageCount(), false);
       const splitted = await splitPdf(pdf, r);
       this.pdfDocs.push(...splitted);
     } catch (err) {

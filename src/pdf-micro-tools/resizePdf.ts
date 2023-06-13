@@ -48,6 +48,11 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
       newWidth = newHeight;
       newHeight = temp;
     }
+    if (page.getRotation().angle % 180 == 90) {
+      const temp = newWidth;
+      newWidth = newHeight;
+      newHeight = temp;
+    }
 
     // set the size of the page
     page.setSize(newWidth, newHeight);
@@ -72,8 +77,8 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
     //   translate the content whereever specifieds
     let translate: [number, number];
 
-    const offsetX = Math.round(newHeight - height * heightScale);
-    const offsetY = Math.round(newWidth - width * widthScale);
+    let offsetX = Math.round(newHeight - height * heightScale);
+    let offsetY = Math.round(newWidth - width * widthScale);
 
     // if the mode is fit-to-page no need to translate the page
     if (options.mode === 'fit-to-page') {
@@ -98,6 +103,12 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
       }
     }
 
+    if (page.getRotation().angle % 180 == 90) {
+      const temp = offsetX;
+      offsetX = offsetY;
+      offsetY = temp;
+    }
+
     if (options.position === 'top-left') {
       translate = [0, offsetX];
     } else if (options.position === 'top-right') {
@@ -117,6 +128,13 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
     } else {
       translate = [offsetY / 2, offsetX / 2];
     }
+
+    if (page.getRotation().angle % 180 == 90) {
+      const temp = translate[0];
+      translate[0] = translate[1];
+      translate[1] = temp;
+    }
+
     page.translateContent(...translate);
   }
 
