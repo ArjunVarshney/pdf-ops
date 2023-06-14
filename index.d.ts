@@ -1,6 +1,6 @@
 import { PDFDocument } from 'pdf-lib';
 
-type resizeOptions = {
+export type resizeOptions = {
   size:
     | [number, number]
     | '4A0'
@@ -67,13 +67,13 @@ type resizeOptions = {
     | 'center-bottom';
 };
 
-type createOptions = resizeOptions & {
+export type createOptions = resizeOptions & {
   opacity?: number;
   degrees?: number;
   margin?: [number, number, number, number];
 };
 
-type fileType = string | File | ArrayBuffer | PDFDocument | Uint8Array;
+export type fileType = string | File | ArrayBuffer | PDFDocument | Uint8Array | Blob;
 
 declare module 'pdf-ops' {
   export class PdfMerger {
@@ -82,7 +82,6 @@ declare module 'pdf-ops' {
     getDoc(): any;
     merge(files: fileType[]): Promise<void>;
     mergeWithRange(orderList: { filepath: fileType; range: [number, number][] }[]): Promise<void>;
-    save(filepath: string): Promise<void>;
     getPdfBuffer(): Promise<Uint8Array | undefined>;
   }
 
@@ -92,7 +91,6 @@ declare module 'pdf-ops' {
     getDocs(): any[];
     split(filepath: fileType): Promise<void>;
     splitWithRange(filepath: fileType, range: [number, number][]): Promise<void>;
-    save(dirpath: string, dirname: string): Promise<void>;
     getPdfBuffer(): Promise<Uint8Array[] | undefined>;
   }
 
@@ -102,7 +100,6 @@ declare module 'pdf-ops' {
     getDoc(): any;
     rotate(file: fileType, degree: number): Promise<void>;
     rotateWithRange(orderList: { file: fileType; range: [number, number][]; degree: number }[]): Promise<void>;
-    save(filepath: string): Promise<void>;
     getPdfBuffer(): Promise<Uint8Array[] | undefined>;
   }
 
@@ -112,7 +109,6 @@ declare module 'pdf-ops' {
     getDoc(): any[];
     resize(file: fileType, options?: resizeOptions): Promise<void>;
     resizeWithRange(orderList: { file: fileType; range: [number, number][]; options?: resizeOptions }): Promise<void>;
-    save(filepath: string): Promise<void>;
     getPdfBuffer(): Promise<Uint8Array[] | undefined>;
   }
 
@@ -128,7 +124,6 @@ declare module 'pdf-ops' {
         margin: [number, number, number, number];
       }[],
     ): Promise<void>;
-    save(filepath: string): Promise<void>;
     getPdfBuffer(): Promise<Uint8Array[] | undefined>;
   }
 
@@ -136,7 +131,6 @@ declare module 'pdf-ops' {
     constructor();
     clearDoc(): Promise<void>;
     createPdf(files: (string | Uint8Array | File)[], options?: createOptions): Promise<void>;
-    save(filepath: string): Promise<void>;
     getPdfBuffer(): Promise<Uint8Array[] | undefined>;
   }
 }

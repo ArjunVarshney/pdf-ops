@@ -61,7 +61,7 @@ export default class PdfManipulator {
           finalOrder.push([pageRange[0] - 1, pageRange[1]]);
         }
         // if the first and last of the order are same then consider it as a single digit
-        else if (pageRange[0] == pageRange[1] && pageRange[0] <= pageCount) {
+        else if (pageRange[0] === pageRange[1] && pageRange[0] <= pageCount) {
           finalOrder.push([pageRange[0] - 1, pageRange[0]]);
         }
       }

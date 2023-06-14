@@ -59,10 +59,10 @@ export default class PdfMarginManipulator extends PdfManipulator {
               r.push([r[r.length - 1][1], pageCount - 1]);
             }
           } else {
-            let includedPages = new Set<number>();
-            let allPages = [...Array(pageCount).keys()];
-            for (let i = 0; i < r.length; i++) {
-              for (let j = r[i][0]; j < r[i][1]; j++) {
+            const includedPages = new Set<number>();
+            const allPages = [...Array(pageCount).keys()];
+            for (const rng of r) {
+              for (let j = rng[0]; j < rng[1]; j++) {
                 includedPages.add(j);
               }
             }

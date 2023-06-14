@@ -48,7 +48,7 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
       newWidth = newHeight;
       newHeight = temp;
     }
-    if (page.getRotation().angle % 180 == 90) {
+    if (page.getRotation().angle % 180 === 90) {
       const temp = newWidth;
       newWidth = newHeight;
       newHeight = temp;
@@ -103,7 +103,7 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
       }
     }
 
-    if (page.getRotation().angle % 180 == 90) {
+    if (page.getRotation().angle % 180 === 90) {
       const temp = offsetX;
       offsetX = offsetY;
       offsetY = temp;
@@ -129,7 +129,7 @@ export const resizePdf = async (mainDoc: PDFDocument, options?: resizeOptions) =
       translate = [offsetY / 2, offsetX / 2];
     }
 
-    if (page.getRotation().angle % 180 == 90) {
+    if (page.getRotation().angle % 180 === 90) {
       const temp = translate[0];
       translate[0] = translate[1];
       translate[1] = temp;
