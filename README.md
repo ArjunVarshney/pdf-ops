@@ -33,12 +33,6 @@
     - [Add margin to pages of different PDFs with a range specification](#add-margin-to-pages-of-different-pdfs-with-a-range-specification)
     - [Merge multiple pdfs with added margin with single object](#merge-multiple-pdfs-with-added-margin-with-single-object)
     - [Get buffer of the resultant pdf with added margin](#get-buffer-of-the-resultant-pdf-with-added-margin)
-  - [Convert Pdf to Image](#convert-pdf-to-image)
-    - [Convert all pages of a PDF to images](#convert-all-pages-of-a-pdf-to-images)
-    - [Possible values in render Options](#possible-values-in-render-options)
-    - [Convert pages of different PDFs with range specification](#convert-pages-of-different-pdfs-with-range-specification)
-    - [Render images of many different PDFs with single object](#render-images-of-many-different-pdfs-with-single-object)
-    - [Get buffer of the resultant Images](#get-buffer-of-the-resultant-images)
   - [Convert images to PDF](#convert-images-to-pdf)
     - [Convert all images to pdf](#convert-all-images-to-pdf)
     - [Possible values in image to pdf options](#possible-values-in-image-to-pdf-options)
@@ -86,7 +80,7 @@ import { PdfSplitter } from 'pdf-ops';
   // Save the folder carrying all the pdfs
   // The first parameter is the path of the directory in which it will get stored
   // The second parameter is the name of the folder
-  await splitter.save('./test_files', 'split');
+  await splitter.getPdfBuffer();
 })();
 ```
 
@@ -109,7 +103,7 @@ import { PdfSplitter } from 'pdf-ops';
   // Save the folder carrying all the pdfs
   // The first parameter is the path of the directory in which it will get stored
   // The second parameter is the name of the folder
-  await splitter.save('./test_files', 'splitWithRange');
+  await splitter.getPdfBuffer();
 })();
 ```
 
@@ -143,13 +137,13 @@ import { PdfSplitter } from 'pdf-ops';
   await splitter.split('test_files/pdf2.pdf');
 
   // Saving the pdfs in the folder named split1
-  await splitter.save('./test_files', 'split1');
+  await splitter.getPdfBuffer();
 
   // Splitting pdf4 into 3 parts and putting it into same object
   await splitter.split('test_files/pdf4.pdf');
 
   // Saving the pdfs in the folder named split2
-  await splitter.save('./test_files', 'split2');
+  await splitter.getPdfBuffer();
 
   // Clearing all the pdfs in the splitter object to empty it
   await splitter.clearDoc();
@@ -158,7 +152,7 @@ import { PdfSplitter } from 'pdf-ops';
   await splitter.splitWithRange('test_files/pdf3.pdf', [['end', 'start']]);
 
   // Saving the pdfs in the folder named split3
-  await splitter.save('./test_files', 'split3');
+  await splitter.getPdfBuffer();
 })();
 ```
 
@@ -184,7 +178,7 @@ import { PdfMerger, PdfSplitter } from 'pdf-ops';
   await merger.merge(splitter.getDocs());
 
   // save the merged pdf
-  await merger.save('test_files/split-merged.pdf');
+  await merger.getPdfBuffer();
 })();
 ```
 
@@ -228,7 +222,7 @@ import { PdfMerger } from 'pdf-ops';
   await merger.merge(['test_files/pdf1.pdf', 'test_files/pdf2.pdf', 'test_files/pdf3.pdf']);
 
   // Save the resultant file on the desired location
-  await merger.save('test_files/merged.pdf');
+  await merger.getPdfBuffer();
 })();
 ```
 
@@ -265,7 +259,7 @@ import { PdfMerger } from 'pdf-ops';
   ]);
 
   // Save the resultant file on the desired path
-  await merger.save('test_files/mergedWithRange.pdf');
+  await merger.getPdfBuffer();
 })();
 ```
 
@@ -306,7 +300,7 @@ import { PdfMerger } from 'pdf-ops';
   await merger.merge(['test_files/pdf4.pdf']);
 
   // saving it as merge1.pdf
-  await merger.save('test_files/merge1.pdf');
+  await merger.getPdfBuffer();
 
   // merging some pages of pdf3 into the already populated object
   await merger.mergeWithRange([
@@ -317,7 +311,7 @@ import { PdfMerger } from 'pdf-ops';
   ]);
 
   // saving it as merge2.pdf
-  await merger.save('test_files/merge2.pdf');
+  await merger.getPdfBuffer();
 
   // clearing all the pages from the object
   await merger.clearDoc();
@@ -342,7 +336,7 @@ import { PdfMerger } from 'pdf-ops';
     },
   ]);
   // saving it as merge3.pdf
-  await merger.save('test_files/merge3.pdf');
+  await merger.getPdfBuffer();
 })();
 ```
 
@@ -389,7 +383,7 @@ import { PdfRotator } from 'pdf-ops';
   await rotator.rotate('test_files/pdf1.pdf', 90);
 
   // Save the rotated Pdf
-  await rotator.save('test_files/rotated.pdf');
+  await rotator.getPdfBuffer();
 })();
 ```
 
@@ -429,7 +423,7 @@ import { PdfRotator } from 'pdf-ops';
   ]);
 
   // Save the rotated Pdf
-  await rotator.save('test_files/rotatedWithRange.pdf');
+  await rotator.getPdfBuffer();
 })();
 ```
 
@@ -465,7 +459,7 @@ import { PdfRotator } from 'pdf-ops';
   ]);
 
   // saving the resultant pdf file as rotated1.pdf
-  await rotator.save('test_files/rotated1.pdf');
+  await rotator.getPdfBuffer();
 
   // rotating some pages and merging pdf2 and rotating it -90 degrees
   await rotator.rotateWithRange([
@@ -477,7 +471,7 @@ import { PdfRotator } from 'pdf-ops';
   ]);
 
   // saving the resultant file as rotated2.pdf
-  await rotator.save('test_files/rotated2.pdf');
+  await rotator.getPdfBuffer();
 
   // clearing all the pages of the object
   await rotator.clearDoc();
@@ -486,7 +480,7 @@ import { PdfRotator } from 'pdf-ops';
   await rotator.rotate('test_files/pdf4.pdf', 0);
 
   // saving the resultant file as rotated3.pdf
-  await rotator.save('test_files/rotated3.pdf');
+  await rotator.getPdfBuffer();
 })();
 ```
 
@@ -544,7 +538,7 @@ import { PdfResizer } from 'pdf-ops';
   await resizer.resize('test_files/pdf3.pdf', options);
 
   // save the resized pdf
-  await resizer.save('./test_files/resized.pdf');
+  await resizer.getPdfBuffer();
 })();
 ```
 
@@ -663,7 +657,7 @@ import { PdfResizer } from 'pdf-ops';
   ]);
 
   // save the resized pdf
-  await resizer.save('./test_files/resizedWithRange.pdf');
+  await resizer.getPdfBuffer();
 })();
 ```
 
@@ -703,7 +697,7 @@ import { PdfResizer } from 'pdf-ops';
   ]);
 
   // save resultant pdf as resized1.pdf
-  await resizer.save('test_files/resized1.pdf');
+  await resizer.getPdfBuffer();
 
   // resize pdf1
   await resizer.resize('test_files/pdf1.pdf', {
@@ -713,7 +707,7 @@ import { PdfResizer } from 'pdf-ops';
   });
 
   // save resultant pdf as resized2.pdf
-  await resizer.save('test_files/resized2.pdf');
+  await resizer.getPdfBuffer();
 
   // clear all the pages from the object
   await resizer.clearDoc();
@@ -727,7 +721,7 @@ import { PdfResizer } from 'pdf-ops';
   ]);
 
   // save resultant pdf as resized3.pdf
-  await resizer.save('test_files/resized3.pdf');
+  await resizer.getPdfBuffer();
 })();
 ```
 
@@ -774,7 +768,7 @@ import { PdfMarginManipulator } from 'pdf-ops';
   await marginManipulator.addMargin('test_files/pdf3.pdf', [20, 10, 5, 15]);
 
   // save the resultant pdf
-  await marginManipulator.save('test_files/addedMargin.pdf');
+  await marginManipulator.getPdfBuffer();
 })();
 ```
 
@@ -810,7 +804,7 @@ import { PdfMarginManipulator } from 'pdf-ops';
   ]);
 
   // save the resultant merged file
-  await marginManipulator.save('test_files/addedMarginWithRange.pdf');
+  await marginManipulator.getPdfBuffer();
 })();
 ```
 
@@ -847,13 +841,13 @@ import { PdfMarginManipulator } from 'pdf-ops';
   ]);
 
   // saving as addMargin1.pdf
-  await marginManipulator.save('test_files/addMargin1.pdf');
+  await marginManipulator.getPdfBuffer();
 
   // adding margin to pdf3
   await marginManipulator.addMargin('test_files/pdf3.pdf', [10, 10, 0, 10]);
 
   // saving as addMargin2.pdf
-  await marginManipulator.save('test_files/addMargin2.pdf');
+  await marginManipulator.getPdfBuffer();
 
   // clearing add the pages with in the object
   await marginManipulator.clearDoc();
@@ -868,7 +862,7 @@ import { PdfMarginManipulator } from 'pdf-ops';
   ]);
 
   // saving as addMargin3.pdf
-  await marginManipulator.save('test_files/addMargin3.pdf');
+  await marginManipulator.getPdfBuffer();
 })();
 ```
 
@@ -900,164 +894,6 @@ import { PdfMarginManipulator } from 'pdf-ops';
 })();
 ```
 
-### Convert Pdf to Image
-
-> Note:- You should have node version > 17 for converting pdf to image on you server
-
-#### **Convert all pages of a PDF to images**
-
-```js
-import { PdfToImageConverter } from 'pdf-ops';
-
-(async () => {
-  // Make an object of the PdfToImageConverter class
-  const converter = new PdfToImageConverter();
-
-  // resize pdf as desired
-  // Specify the desired options(optional) refer to details below this block
-  const options = {
-    // You can also give custom sizes
-    //eg- size: [900, 900],
-    size: 'A3',
-    orientation: 'landscape',
-    mode: 'crop',
-    position: 'center-right',
-  };
-
-  // The specification of options is not necessary, if not given, default values will take over
-  await converter.renderToImage('test_files/pdf4.pdf', options);
-
-  // Save the folder carrying all the images
-  // The first parameter is the path of the directory in which it will get stored
-  // The second parameter is the name of the folder
-  // third parameter is the export type (either 'png' or 'jpg'), it is optional
-  await converter.save('./test_files', 'images', 'png');
-})();
-```
-
-In this example [pdf4](/example-files/pdf4.pdf) will generate [images folder](/example-files/images/)
-
-#### **Possible values in render Options**
-
-```js
-// default values in the render options
-default_render_options = {
-  size: 'do-not-change',
-  orientation: 'portrait',
-  mode: 'shrink-to-fit',
-  position: 'center',
-};
-
-// possible values in the options
-// all the resize options can be applied as renderOptions
-type renderOptions = resizeOptions;
-```
-
-Refer to [resizeOptions](#possible-values-in-resize-options) for all the list of all the options
-
-#### **Convert pages of different PDFs with range specification**
-
-```js
-import { PdfToImageConverter } from 'pdf-ops';
-
-(async () => {
-  // Make an object of the PdfToImageConverter class
-  const converter = new PdfToImageConverter();
-
-  // convert the pdf to image as desired
-  await converter.renderToImageWithRange([
-    {
-      file: 'test_files/pdf2.pdf',
-      range: [1, 2, 6],
-      options: { size: 'A4' },
-    },
-    {
-      file: 'test_files/pdf3.pdf',
-      range: [3, 4],
-    },
-  ]);
-
-  // save the forlder of images
-  await converter.save('./test_files', 'imagesWithRange', 'png');
-})();
-```
-
-In this example [pdf2](/example-files/pdf2.pdf) and [pdf3](/example-files/pdf3.pdf) will generate [imagesWithRange folder](/example-files/imagesWithRange/)
-
-#### **Render images of many different PDFs with single object**
-
-- You can keep on adding more and more image files in the same object, when you will save the images, all of them will be in the same folder, in the order in which they were splitted
-
-- Saving the file does not clear out the existing images, as you populate more and more images in the same object they will keep on getting accumulated.
-
-- For clearing all the images stored in the object you can use `converter.clearDoc()` to reinitialize a new empty PdfToImageConverter object
-
-- Let us put all the above into a expample for explanation
-
-```js
-import { PdfToImageConverter } from 'pdf-ops';
-
-(async () => {
-  const converter = new PdfToImageConverter();
-
-  // render pdf1
-  await converter.renderToImage('test_files/pdf1.pdf');
-
-  // some pages of pdf2
-  await converter.renderToImageWithRange([
-    {
-      file: 'test_files/pdf2.pdf',
-      range: [2, 5, 6],
-    },
-  ]);
-
-  // save inside images1 folder
-  await converter.save('./test_files', 'images1');
-
-  // render pdf3
-  await converter.renderToImage('test_files/pdf3.pdf');
-
-  // save inside images2 folder
-  await converter.save('./test_files', 'images2');
-
-  // clear the documents
-  await converter.clearDoc();
-
-  // render some pages of pdf4
-  await converter.renderToImageWithRange([{ file: 'test_files/pdf4.pdf', range: [[2, 5]] }]);
-
-  // save inside images3 folder
-  await converter.save('./test_files', 'images3');
-})();
-```
-
-- If [pdf1](/example-files/pdf1.pdf), [pdf2](/example-files/pdf2.pdf), [pdf3](/example-files/pdf3.pdf), and [pdf4](/example-files/pdf4.pdf) look like this
-- Then [images1](/example-files/images1/), [image2](/example-files/images2/), and [images3](/example-files/images3/) will look like this
-
-#### **Get buffer of the resultant Images**
-
-- Getting the buffer (Uint8Array) is pretty straight foward. You can access buffer by `converter.getImageBuffer()` and it will return you the array of buffers of all the images in the resultant object
-
-```js
-import { PdfToImageConverter } from 'pdf-ops';
-
-(async () => {
-  const converter = new PdfToImageConverter();
-  await converter.renderToImage('test_files/pdf1.pdf');
-  await converter.renderToImageWithRange([
-    {
-      file: 'test_files/pdf2.pdf',
-      range: [2, 5, 6],
-    },
-  ]);
-
-  // To get the list of all the image buffers
-  const bufferList = converter.getImageBuffer();
-
-  console.log(bufferList);
-})();
-```
-
 ### Convert images to PDF
 
 #### **Convert all images to pdf**
@@ -1086,7 +922,7 @@ import { ImageToPdfConverter } from 'pdf-ops';
   );
 
   // save the resultant pdf to desired locations
-  await converter.save('test_files/imgToPdf.pdf');
+  await converter.getPdfBuffer();
 })();
 ```
 
@@ -1147,7 +983,7 @@ import { ImageToPdfConverter } from 'pdf-ops';
   );
 
   // save the resultant mergeed pdf to desired locations
-  await converter.save('test_files/imgToPdfMerged.pdf');
+  await converter.getPdfBuffer();
 })();
 ```
 
