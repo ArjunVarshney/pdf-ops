@@ -61,6 +61,7 @@ This node js package is able to perform various pdf tasks as desired and is able
 
 ## Usage Examples
 
+> **Note** - Some of the functions in this module only work on the clients side, not on server side
 > **Note** - All the pdf files in these examples are not kept directly inside of the root folder but in a folder named "test_files" inside the root folder
 
 ### Split Pdfs
@@ -74,17 +75,15 @@ import { PdfSplitter } from 'pdf-ops';
   // Make an object of the PdfSplitter class
   const splitter = new PdfSplitter();
 
-  // Split the desired pdf
-  await splitter.split('test_files/pdf1.pdf');
+  // inputFile can be a instance of File or Blob or PdfDocument(pdf-lib) or it can be a Uint8Arrayor ArrayBuffer
+  await splitter.split(pdf1);
 
-  // Save the folder carrying all the pdfs
-  // The first parameter is the path of the directory in which it will get stored
-  // The second parameter is the name of the folder
-  await splitter.getPdfBuffer();
+  // This will give the Uint8Array of the processed Pdf
+  const split = await splitter.getPdfBuffer();
 })();
 ```
 
-For [pdf1](/example-files/pdf1.pdf) the folder formed will be [split](/example-files/split/) inside the directory "test_files"
+For [pdf1](/example-files/pdf1.pdf) the pdfs formed will be [split](/example-files/split/)
 
 #### **Split PDF with range specification**
 
@@ -95,19 +94,16 @@ import { PdfSplitter } from 'pdf-ops';
   // Make an object of the PdfSplitter class
   const splitter = new PdfSplitter();
 
-  // Split the desired pdf into desired parts
-  // Reverse selection will separate each page within the selection
+  // inputFile can be a instance of File or Blob or PdfDocument(pdf-lib) or it can be a Uint8Array or ArrayBuffer
   // read the rules for specifying range
-  await splitter.splitWithRange('test_files/pdf2.pdf', [1, [2, 3], [4, 6], ['end', 3]]);
+  await splitter.splitWithRange(pdf2, [1, [2, 3], [4, 6], ['end', 3]]);
 
-  // Save the folder carrying all the pdfs
-  // The first parameter is the path of the directory in which it will get stored
-  // The second parameter is the name of the folder
-  await splitter.getPdfBuffer();
+  const splitWithRange = await splitter.getPdfBuffer();
+  // This will give the Uint8Array of the processed Pdf
 })();
 ```
 
-For [pdf2](/example-files/pdf2.pdf) the folder formed will be [splitWithRange](/example-files/splitWithRange/) inside the directory "test_files"
+For [pdf2](/example-files/pdf2.pdf) the files formed will be [splitWithRange](/example-files/splitWithRange/)
 
 #### **Split multiple PDFs with a single object**
 
@@ -115,7 +111,7 @@ For [pdf2](/example-files/pdf2.pdf) the folder formed will be [splitWithRange](/
 
 - Saving the file does not clear out the existing object, as you populate more and more pdfs in the same object they will keep on getting accumulated.
 
-- For clearing all the pdfs stored in the object you can use `splitter.clearDoc()` to reinitialize a new empty PdfSplitter object
+- For clearing all the pdfs stored in the object you can use `splitter.clearDoc()` to reinitialize a the PdfSplitter object
 
 - Let us put all the above into a expample for explanation
 
@@ -127,32 +123,32 @@ import { PdfSplitter } from 'pdf-ops';
   const splitter = new PdfSplitter();
 
   // Splitting pdf1 into two pdfs
-  await splitter.splitWithRange('test_files/pdf1.pdf', [
+  await splitter.splitWithRange(pdf1, [
     [1, 3],
     [4, 6],
   ]);
 
   // Splitting pdf2 into single paged pdfs
   // The splitted pdf1 and pdf2 are now in the same object
-  await splitter.split('test_files/pdf2.pdf');
+  await splitter.split(pdf2);
 
   // Saving the pdfs in the folder named split1
-  await splitter.getPdfBuffer();
+  const split1 = await splitter.getPdfBuffer();
 
   // Splitting pdf4 into 3 parts and putting it into same object
-  await splitter.split('test_files/pdf4.pdf');
+  await splitter.split(pdf4);
 
   // Saving the pdfs in the folder named split2
-  await splitter.getPdfBuffer();
+  const split2 = await splitter.getPdfBuffer();
 
   // Clearing all the pdfs in the splitter object to empty it
   await splitter.clearDoc();
 
   // Splitting pdf3 in reverse order
-  await splitter.splitWithRange('test_files/pdf3.pdf', [['end', 'start']]);
+  await splitter.splitWithRange(pdf3, [['end', 'start']]);
 
   // Saving the pdfs in the folder named split3
-  await splitter.getPdfBuffer();
+  const split3 = await splitter.getPdfBuffer();
 })();
 ```
 
@@ -166,9 +162,9 @@ import { PdfMerger, PdfSplitter } from 'pdf-ops';
 
 (async () => {
   const splitter = new PdfSplitter();
-  await splitter.splitWithRange('test_files/pdf1.pdf', [[1, 3]]);
-  await splitter.split('test_files/pdf2.pdf');
-  await splitter.splitWithRange('test_files/pdf1.pdf', [[4, 6]]);
+  await splitter.splitWithRange(pdf1, [[1, 3]]);
+  await splitter.split(pdf2);
+  await splitter.splitWithRange(pdf1, [[4, 6]]);
 
   // To merge the pdfs in the splitter
   // Make an object of PdfMerger
@@ -177,8 +173,7 @@ import { PdfMerger, PdfSplitter } from 'pdf-ops';
   // Pass the docs of splitter into merger
   await merger.merge(splitter.getDocs());
 
-  // save the merged pdf
-  await merger.getPdfBuffer();
+  const split_merged = await merger.getPdfBuffer();
 })();
 ```
 
@@ -196,14 +191,12 @@ import { PdfSplitter } from 'pdf-ops';
   const splitter = new PdfSplitter();
 
   // Split the desired pdfs
-  await splitter.splitWithRange('test_files/pdf1.pdf', [[1, 3]]);
-  await splitter.split('test_files/pdf2.pdf');
-  await splitter.splitWithRange('test_files/pdf1.pdf', [[4, 6]]);
+  await splitter.splitWithRange(pdf1, [[1, 3]]);
+  await splitter.split(pdf2);
+  await splitter.splitWithRange(pdf1, [[4, 6]]);
 
   // Get pdf buffer
   const bufferList = await splitter.getPdfBuffer();
-
-  console.log(bufferList);
 })();
 ```
 
@@ -218,11 +211,11 @@ import { PdfMerger } from 'pdf-ops';
   // Make an object of the PdfMerger class
   const merger = new PdfMerger();
 
-  // Give the paths of all the pdfs inside an array
-  await merger.merge(['test_files/pdf1.pdf', 'test_files/pdf2.pdf', 'test_files/pdf3.pdf']);
+  // inputFile(pdf1, pdf2, pdf3) can be a instance of File or Blob or PdfDocument(pdf-lib) or it can be a Uint8Array
+  await merger.merge([pdf1, pdf2, pdf3]);
 
-  // Save the resultant file on the desired location
-  await merger.getPdfBuffer();
+  // This will give the Uint8Array of the processed Pdf
+  const merged = await merger.getPdfBuffer();
 })();
 ```
 
@@ -237,29 +230,29 @@ import { PdfMerger } from 'pdf-ops';
   // Make an object of the PdfMerger class
   const merger = new PdfMerger();
 
-  // Specify the filepath with the range
+  // inputFile can be a instance of File or Blob or PdfDocument(pdf-lib) or it can be a Uint8Array
   // read the rules to specify range
   await merger.mergeWithRange([
     {
-      filepath: 'test_files/pdf4.pdf',
+      filepath: pdf4,
       range: [1, 5],
     },
     {
-      filepath: 'test_files/pdf1.pdf',
+      filepath: pdf1,
       range: [1, 2],
     },
     {
-      filepath: 'test_files/pdf2.pdf',
+      filepath: pdf2,
       range: [3, 4],
     },
     {
-      filepath: 'test_files/pdf3.pdf',
+      filepath: pdf3,
       range: [5, 6],
     },
   ]);
 
-  // Save the resultant file on the desired path
-  await merger.getPdfBuffer();
+  // This will give the Uint8Array of the processed Pdf
+  const mergedWithRange = await merger.getPdfBuffer();
 })();
 ```
 
@@ -287,31 +280,31 @@ import { PdfMerger } from 'pdf-ops';
   // first merging some pages of pdf1 and pdf2
   await merger.mergeWithRange([
     {
-      filepath: 'test_files/pdf1.pdf',
+      filepath: pdf1,
       range: [1, 2],
     },
     {
-      filepath: 'test_files/pdf2.pdf',
+      filepath: pdf2,
       range: [5, 6],
     },
   ]);
 
   // merging all the pages of pdf4 into the already populated object
-  await merger.merge(['test_files/pdf4.pdf']);
+  await merger.merge([pdf4]);
 
-  // saving it as merge1.pdf
-  await merger.getPdfBuffer();
+  // saving it as merge1
+  const merge1 = await merger.getPdfBuffer();
 
   // merging some pages of pdf3 into the already populated object
   await merger.mergeWithRange([
     {
-      filepath: 'test_files/pdf3.pdf',
+      filepath: pdf3,
       range: [[2, 4]],
     },
   ]);
 
-  // saving it as merge2.pdf
-  await merger.getPdfBuffer();
+  // saving it as merge2
+  const merge2 = await merger.getPdfBuffer();
 
   // clearing all the pages from the object
   await merger.clearDoc();
@@ -319,24 +312,24 @@ import { PdfMerger } from 'pdf-ops';
   // merging first and last page of pdf1, pdf2, pdf3, pdf4
   await merger.mergeWithRange([
     {
-      filepath: 'test_files/pdf1.pdf',
+      filepath: pdf1,
       range: [1, 6],
     },
     {
-      filepath: 'test_files/pdf2.pdf',
+      filepath: pdf2,
       range: [1, 6],
     },
     {
-      filepath: 'test_files/pdf3.pdf',
+      filepath: pdf3,
       range: [1, 6],
     },
     {
-      filepath: 'test_files/pdf4.pdf',
+      filepath: pdf4,
       range: [1, 6],
     },
   ]);
-  // saving it as merge3.pdf
-  await merger.getPdfBuffer();
+  // saving it as merge3
+  const merge3 = await merger.getPdfBuffer();
 })();
 ```
 
@@ -355,10 +348,10 @@ import { PdfMerger } from 'pdf-ops';
 
   // Merge the desired pdfs
   await merger.mergeWithRange([
-    { filepath: 'test_files/pdf1.pdf', range: [1, 2] },
-    { filepath: 'test_files/pdf2.pdf', range: [5, 6] },
+    { filepath: pdf1, range: [1, 2] },
+    { filepath: pdf2, range: [5, 6] },
   ]);
-  await merger.merge(['test_files/pdf4.pdf']);
+  await merger.merge([pdf4]);
 
   // Get the buffer of the merged pdfs
   const buffer = await merger.getPdfBuffer();
@@ -380,10 +373,10 @@ import { PdfRotator } from 'pdf-ops';
 
   // rotate the desired pdf
   // the angle should be a multiple of 90
-  await rotator.rotate('test_files/pdf1.pdf', 90);
+  await rotator.rotate(pdf1, 90);
 
   // Save the rotated Pdf
-  await rotator.getPdfBuffer();
+  const rotated = await rotator.getPdfBuffer();
 })();
 ```
 
@@ -403,20 +396,20 @@ import { PdfRotator } from 'pdf-ops';
   // as given in the example
   await rotator.rotateWithRange([
     {
-      // give the filepath inside the file field
-      file: 'test_files/pdf1.pdf',
+      // inputFile can be a instance of File or Blob or PdfDocument(pdf-lib) or it can be a Uint8Array
+      file: pdf1,
       // range is a list to specify the pages of the pdf (read the rules for specifying this list)
       range: [1, 2, 5, 6],
       // degree should be a multiple of 90
       degree: 90,
     },
     {
-      file: 'test_files/pdf2.pdf',
+      file: pdf2,
       range: [1, 5],
       degree: -90,
     },
     {
-      file: 'test_files/pdf3.pdf',
+      file: pdf3,
       range: [5, 6, 1, 2],
       degree: 180,
     },
@@ -447,40 +440,40 @@ import { PdfRotator } from 'pdf-ops';
   const rotator = new PdfRotator();
 
   // rotating pdf1 90 degrees
-  await rotator.rotate('test_files/pdf1.pdf', 90);
+  await rotator.rotate(pdf1, 90);
 
   // rotating some pages of pdf3 180 degrees and merging into previous pdf
   await rotator.rotateWithRange([
     {
-      file: 'test_files/pdf3.pdf',
+      file: pdf3,
       range: [[2, 5]],
       degree: 180,
     },
   ]);
 
-  // saving the resultant pdf file as rotated1.pdf
-  await rotator.getPdfBuffer();
+  // saving the resultant pdf file as rotated1
+  const rotated1 = await rotator.getPdfBuffer();
 
   // rotating some pages and merging pdf2 and rotating it -90 degrees
   await rotator.rotateWithRange([
     {
-      file: 'test_files/pdf2.pdf',
+      file: pdf2,
       range: [1, 6],
       degree: -90,
     },
   ]);
 
   // saving the resultant file as rotated2.pdf
-  await rotator.getPdfBuffer();
+  const rotated2 = await rotator.getPdfBuffer();
 
   // clearing all the pages of the object
   await rotator.clearDoc();
 
   // rotating pdf4 by 0 degrees
-  await rotator.rotate('test_files/pdf4.pdf', 0);
+  await rotator.rotate(pdf4, 0);
 
   // saving the resultant file as rotated3.pdf
-  await rotator.getPdfBuffer();
+  const rotated3 = await rotator.getPdfBuffer();
 })();
 ```
 
@@ -498,15 +491,15 @@ import { PdfRotator } from 'pdf-ops';
   const rotator = new PdfRotator();
 
   // Rotate the pdfs as desired
-  await rotator.rotate('test_files/pdf1.pdf', 90);
+  await rotator.rotate(pdf1, 90);
   await rotator.rotateWithRange([
     {
-      file: 'test_files/pdf3.pdf',
+      file: pdf3,
       range: [[2, 5]],
       degree: 180,
     },
   ]);
-  await rotator.rotate('test_files/pdf4.pdf', 0);
+  await rotator.rotate(pdf4, 0);
 
   // To the the buffer of the resultant pdf
   const buffer = await rotator.getPdfBuffer();
@@ -535,10 +528,10 @@ import { PdfResizer } from 'pdf-ops';
   };
 
   // The specification of options is not necessary, if not given, default values will take over
-  await resizer.resize('test_files/pdf3.pdf', options);
+  await resizer.resize(pdf3, options);
 
   // save the resized pdf
-  await resizer.getPdfBuffer();
+  const resized = await resizer.getPdfBuffer();
 })();
 ```
 
@@ -635,10 +628,12 @@ import { PdfResizer } from 'pdf-ops';
   const resizer = new PdfResizer();
 
   // resize pdf as desired
-  // multiple resized pdf will be merged into one during save
+  // multiple resized pdf will be merged into one
   await resizer.resizeWithRange([
     {
-      file: 'test_files/pdf1.pdf',
+      // inputFile can be a instance of File or Blob or PdfDocument(pdf-lib) or it can be a Uint8Array
+      file: pdf1,
+      // refer to the rules to pecify range
       range: [[3, 5]],
       // refer to the resize options for possible allowed values
       options: {
@@ -647,7 +642,7 @@ import { PdfResizer } from 'pdf-ops';
       },
     },
     {
-      file: 'test_files/pdf4.pdf',
+      file: pdf4,
       range: [[2, 3]],
       options: {
         size: 'A5',
@@ -656,8 +651,7 @@ import { PdfResizer } from 'pdf-ops';
     },
   ]);
 
-  // save the resized pdf
-  await resizer.getPdfBuffer();
+  const resizedWithRange = await resizer.getPdfBuffer();
 })();
 ```
 
@@ -681,7 +675,7 @@ import { PdfResizer } from 'pdf-ops';
   const resizer = new PdfResizer();
 
   // resize pdf3
-  await resizer.resize('test_files/pdf3.pdf', {
+  await resizer.resize(pdf3, {
     size: 'A3',
     mode: 'crop',
     position: 'top-left',
@@ -690,24 +684,24 @@ import { PdfResizer } from 'pdf-ops';
   // resize some pages of pdf4
   await resizer.resizeWithRange([
     {
-      file: 'test_files/pdf4.pdf',
+      file: pdf4,
       range: [1, 2, 5],
       options: { size: 'A5' },
     },
   ]);
 
-  // save resultant pdf as resized1.pdf
-  await resizer.getPdfBuffer();
+  // save resultant pdf as resized1
+  const resized1 = await resizer.getPdfBuffer();
 
   // resize pdf1
-  await resizer.resize('test_files/pdf1.pdf', {
+  await resizer.resize(pdf1, {
     size: 'A4',
     orientation: 'landscape',
     position: 'center-right',
   });
 
-  // save resultant pdf as resized2.pdf
-  await resizer.getPdfBuffer();
+  // save resultant pdf as resized2
+  const resized2 = await resizer.getPdfBuffer();
 
   // clear all the pages from the object
   await resizer.clearDoc();
@@ -715,13 +709,13 @@ import { PdfResizer } from 'pdf-ops';
   // resize some pages of pdf2
   await resizer.resizeWithRange([
     {
-      file: 'test_files/pdf2.pdf',
+      file: pdf2,
       range: [2, 3],
     },
   ]);
 
-  // save resultant pdf as resized3.pdf
-  await resizer.getPdfBuffer();
+  // save resultant pdf as resized3
+  const resized3 = await resizer.getPdfBuffer();
 })();
 ```
 
@@ -737,10 +731,10 @@ import { PdfResizer } from 'pdf-ops';
 
 (async () => {
   const resizer = new PdfResizer();
-  await resizer.resize('test_files/pdf3.pdf', { size: 'A3', mode: 'crop' });
+  await resizer.resize(pdf3, { size: 'A3', mode: 'crop' });
   await resizer.resizeWithRange([
     {
-      file: 'test_files/pdf4.pdf',
+      file: pdf4,
       range: [1, 2],
       options: { size: 'A5' },
     },
@@ -765,10 +759,11 @@ import { PdfMarginManipulator } from 'pdf-ops';
   const marginManipulator = new PdfMarginManipulator();
 
   // add margin to the pdf in [top, right, bottom, left] fashion
-  await marginManipulator.addMargin('test_files/pdf3.pdf', [20, 10, 5, 15]);
+  // inputFile can be a instance of File or Blob or PdfDocument(pdf-lib) or it can be a Uint8Array
+  await marginManipulator.addMargin(pdf3, [20, 10, 5, 15]);
 
   // save the resultant pdf
-  await marginManipulator.getPdfBuffer();
+  const addedMargin = await marginManipulator.getPdfBuffer();
 })();
 ```
 
@@ -786,25 +781,27 @@ import { PdfMarginManipulator } from 'pdf-ops';
   // add the margin to different pages of different pdfs like as follows
   await marginManipulator.addMarginWithRange([
     {
-      file: 'test_files/pdf1.pdf',
+      // inputFile can be a instance of File or Blob or PdfDocument(pdf-lib) or it can be a Uint8Array
+      file: pdf1,
+      // read the rules to specify range of the pages
       range: [1, 2],
       // [top, right, bottom, left]
       margin: [10, 10, 10, 10],
     },
     {
-      file: 'test_files/pdf2.pdf',
+      file: pdf2,
       range: [3, 4],
       margin: [20, 20, 20, 20],
     },
     {
-      file: 'test_files/pdf3.pdf',
+      file: pdf3,
       range: [5, 6],
       margin: [30, 30, 30, 30],
     },
   ]);
 
   // save the resultant merged file
-  await marginManipulator.getPdfBuffer();
+  const addedMarginWithRange = await marginManipulator.getPdfBuffer();
 })();
 ```
 
@@ -829,25 +826,25 @@ import { PdfMarginManipulator } from 'pdf-ops';
 
   // adding margin to pdf1
   // the margin should be in the format [top, right, bottom, left]
-  await marginManipulator.addMargin('test_files/pdf1.pdf', [0, 10, 10, 10]);
+  await marginManipulator.addMargin(pdf1, [0, 10, 10, 10]);
 
   // adding margin to some pages of pdf2
   await marginManipulator.addMarginWithRange([
     {
-      file: 'test_files/pdf2.pdf',
+      file: pdf2,
       range: [[2, 4]],
       margin: [10, 0, 10, 10],
     },
   ]);
 
-  // saving as addMargin1.pdf
-  await marginManipulator.getPdfBuffer();
+  // saving as addMargin1
+  const addMargin1 = await marginManipulator.getPdfBuffer();
 
   // adding margin to pdf3
-  await marginManipulator.addMargin('test_files/pdf3.pdf', [10, 10, 0, 10]);
+  await marginManipulator.addMargin(pdf3, [10, 10, 0, 10]);
 
-  // saving as addMargin2.pdf
-  await marginManipulator.getPdfBuffer();
+  // saving as addMargin2
+  const addMargin2 = await marginManipulator.getPdfBuffer();
 
   // clearing add the pages with in the object
   await marginManipulator.clearDoc();
@@ -855,14 +852,14 @@ import { PdfMarginManipulator } from 'pdf-ops';
   // adding margin to some pages of pdf3
   await marginManipulator.addMarginWithRange([
     {
-      file: 'test_files/pdf4.pdf',
+      file: pdf4,
       range: [1, 5, 6],
       margin: [10, 10, 10, 0],
     },
   ]);
 
-  // saving as addMargin3.pdf
-  await marginManipulator.getPdfBuffer();
+  // saving as addMargin3
+  const addMargin3 = await marginManipulator.getPdfBuffer();
 })();
 ```
 
@@ -878,10 +875,10 @@ import { PdfMarginManipulator } from 'pdf-ops';
 
 (async () => {
   const marginManipulator = new PdfMarginManipulator();
-  await marginManipulator.addMargin('test_files/pdf1.pdf', [0, 10, 10, 10]);
+  await marginManipulator.addMargin(pdf1, [0, 10, 10, 10]);
   await marginManipulator.addMarginWithRange([
     {
-      file: 'test_files/pdf2.pdf',
+      file: pdf2,
       range: [[2, 4]],
       margin: [10, 0, 10, 10],
     },
@@ -1039,7 +1036,7 @@ import { ImageToPdfConverter } from 'pdf-ops';
 ### File input
 
 - You can give any of the follow type as input to the variable:
-  - string: Path of the file in the file system
+  - Blob: raw file.
   - File: input file from the DOM
   - ArrayBuffer: Input file using fs module
   - Uint8Array: Input file using fs module

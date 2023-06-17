@@ -1,5 +1,17 @@
-import Jimp from 'jimp';
 import { PDFDocument, PDFImage } from 'pdf-lib';
+
+function check(headers: any[]) {
+  return (
+    buffers: Uint8Array,
+    options = {
+      offset: 0,
+    },
+  ) => headers.every((header, index) => header === buffers[options.offset + index]);
+}
+
+const isPNG = check([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const isJPEG = check([0xff, 0xd8, 0xff]);
+const isJPG = check([0xff, 0xd8]);
 
 export const imageToPdf = async (images: Uint8Array[]) => {
   try {
@@ -10,14 +22,10 @@ export const imageToPdf = async (images: Uint8Array[]) => {
     for (const image of images) {
       let drawable: PDFImage;
 
-      // check if the image is a jpeg of png
-      const img = await Jimp.read(Buffer.from(image));
-      const type = img.getMIME();
-
-      if (type === 'image/png') {
+      if (isPNG(image)) {
         // if png then use embedPng
         drawable = await newPdf.embedPng(image);
-      } else if (type === 'image/jpg' || type === 'image/jpeg') {
+      } else if (isJPEG(image) || isJPG(image)) {
         // if jpeg of jpg use embedJpg
         drawable = await newPdf.embedJpg(image);
       } else {

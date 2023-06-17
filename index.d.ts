@@ -1,7 +1,7 @@
 import { PDFDocument } from 'pdf-lib';
 
 export type resizeOptions = {
-  size:
+  size?:
     | [number, number]
     | '4A0'
     | '2A0'
@@ -65,6 +65,7 @@ export type resizeOptions = {
     | 'center-right'
     | 'center-top'
     | 'center-bottom';
+  rest?: restType;
 };
 
 export type createOptions = resizeOptions & {
@@ -73,64 +74,65 @@ export type createOptions = resizeOptions & {
   margin?: [number, number, number, number];
 };
 
-export type fileType = string | File | ArrayBuffer | PDFDocument | Uint8Array | Blob;
+type restType = 'include' | 'exclude' | undefined | null;
+
+export type fileType = File | ArrayBuffer | PDFDocument | Uint8Array | Blob;
 
 declare module 'pdf-ops' {
-  export class PdfMerger {
+  class PdfManipulator {
+    pdfDocs: PDFDocument | undefined;
     constructor();
     clearDoc(): Promise<void>;
-    getDoc(): any;
+    getDoc(): PDFDocument;
+    ensureDoc(): Promise<void>;
+    processOrder(): Promise<[number, number]>;
+    readDoc(): Promise<PDFDocument>;
+    getPdfBuffer(): Promise<Uint8Array | Uint8Array[]>;
+  }
+  export class PdfMerger extends PdfManipulator {
     merge(files: fileType[]): Promise<void>;
     mergeWithRange(orderList: { filepath: fileType; range: [number, number][] }[]): Promise<void>;
-    getPdfBuffer(): Promise<Uint8Array | undefined>;
+    getPdfBuffer(): Promise<Uint8Array>;
   }
 
-  export class PdfSplitter {
+  export class PdfSplitter extends PdfManipulator {
     constructor();
     clearDoc(): Promise<void>;
     getDocs(): any[];
     split(filepath: fileType): Promise<void>;
     splitWithRange(filepath: fileType, range: [number, number][]): Promise<void>;
-    getPdfBuffer(): Promise<Uint8Array | undefined>;
+    getPdfBuffer(): Promise<Uint8Array[]>;
   }
 
-  export class PdfRotator {
-    constructor();
-    clearDoc(): Promise<void>;
-    getDoc(): any;
+  export class PdfRotator extends PdfManipulator {
     rotate(file: fileType, degree: number): Promise<void>;
-    rotateWithRange(orderList: { file: fileType; range: [number, number][]; degree: number }[]): Promise<void>;
-    getPdfBuffer(): Promise<Uint8Array | undefined>;
+    rotateWithRange(
+      orderList: { file: fileType; range: [number, number][]; degree: number; rest?: restType }[],
+    ): Promise<void>;
+    getPdfBuffer(): Promise<Uint8Array>;
   }
 
-  export class PdfResizer {
-    constructor();
-    clearDoc(): Promise<void>;
-    getDoc(): any[];
+  export class PdfResizer extends PdfManipulator {
     resize(file: fileType, options?: resizeOptions): Promise<void>;
     resizeWithRange(orderList: { file: fileType; range: [number, number][]; options?: resizeOptions }): Promise<void>;
-    getPdfBuffer(): Promise<Uint8Array | undefined>;
+    getPdfBuffer(): Promise<Uint8Array>;
   }
 
-  export class PdfMarginManipulator {
-    constructor();
-    clearDoc(): Promise<void>;
-    getDoc(): any[];
+  export class PdfMarginManipulator extends PdfManipulator {
     addMargin(file: fileType, margin: [number, number, number, number]): Promise<void>;
     addMarginWithRange(
       orderList: {
         file: fileType;
         range: [number, number][];
         margin: [number, number, number, number];
+        rest?: restType;
       }[],
     ): Promise<void>;
-    getPdfBuffer(): Promise<Uint8Array | undefined>;
+    getPdfBuffer(): Promise<Uint8Array>;
   }
 
-  export class ImageToPdfConverter {
-    constructor();
-    clearDoc(): Promise<void>;
+  export class ImageToPdfConverter extends PdfManipulator {
     createPdf(files: (string | Uint8Array | File)[], options?: createOptions): Promise<void>;
-    getPdfBuffer(): Promise<Uint8Array | undefined>;
+    getPdfBuffer(): Promise<Uint8Array>;
   }
 }
